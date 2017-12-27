@@ -1,6 +1,7 @@
 import serial
 import gex
-from gex import TinyFrame, PayloadParser
+from gex import TinyFrame, PayloadParser, TF, PayloadBuilder
+
 
 class Client:
     """ GEX client """
@@ -79,7 +80,7 @@ class Client:
                 self.tf.accept(rv)
 
     def send(self, cs, cmd, id=None, pld=None, listener=None):
-        """ Send a command to a unit """
+        """ Send a command to a unit. If cs is None, cmd is used as message type """
         if cs is None:
             return self.tf.query(type=cmd, id=id, pld=pld, listener=listener)
 
@@ -91,18 +92,22 @@ class Client:
         self.tf.query(type=gex.MSG_UNIT_REQUEST, id=id, pld=buf, listener=listener)
 
     def query(self, cs, cmd, id=None, pld=None):
-        """ Query a unit """
+        """ Query a unit. If cs is None, cmd is used as message type """
 
         self._theframe = None
 
         def lst(tf, frame):
             self._theframe = frame
+            return TF.CLOSE
 
         self.send(cs, cmd, id=id, pld=pld, listener=lst)
         self.poll()
 
         if self._theframe is None:
             raise Exception("No response to query")
+
+        if self._theframe.type == gex.MSG_ERROR:
+            raise Exception("Error response: %s" % self._theframe.data.decode('utf-8'))
 
         return self._theframe
 
@@ -113,3 +118,41 @@ class Client:
     def send_raw(self, type, id=None, pld=None):
         """ Send to GEX, without addressing a unit """
         return self.send(cs=None, cmd=type, id=id, pld=pld)
+
+    def bulk_read(self, cs, cmd, id=None, pld=None, chunk=1024):
+        """ Perform a bulk read. If cs is None, cmd is used as message type """
+
+        offer = self.query(cs=cs, cmd=cmd, id=id, pld=pld)
+        if offer.type != gex.MSG_BULK_READ_OFFER:
+            raise Exception("Bulk read rejected! %s" % offer.data.decode('utf-8'))
+
+        # parse the offer
+        pp = PayloadParser(offer.data)
+        total = pp.u32()
+        # we don't need to worry much about the total size,
+        # this is for static buffers in C.
+
+        at = 0
+        buffer = bytearray()
+        while at < total:
+            # Ask for a chunk
+            pb = PayloadBuilder()
+            pb.u32(chunk)
+
+            pollrv = self.query_raw(type=gex.MSG_BULK_READ_POLL, id=offer.id, pld=pb.close())
+
+            if pollrv.type in [gex.MSG_BULK_DATA, gex.MSG_BULK_END]:
+                buffer.extend(pollrv.data)
+                at += len(pollrv.data)
+                if pollrv.type == gex.MSG_BULK_END:
+                    break
+            else:
+                raise Exception("Unexpected bulk frame type %d" % pollrv.type)
+
+        return buffer
+
+    def bulk_write(self, cs, cmd, bulk, id=None, pld=None):
+        """ Perform a bulk write. If cs is None, cmd is used as message type """
+
+
+
