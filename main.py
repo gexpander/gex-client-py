@@ -4,8 +4,9 @@ import gex
 
 client = gex.Client()
 
-s = client.ini_read()
-client.ini_write(s)
+if False:
+    s = client.ini_read()
+    client.ini_write(s)
 
 if False:
     buf = client.bulk_read(None, gex.MSG_INI_READ)
@@ -13,7 +14,7 @@ if False:
 
     client.bulk_write(None, gex.MSG_INI_WRITE, buf)
 
-if False:
+if True:
     led = gex.Pin(client, 'LED')
 
     for i in range(0,10):

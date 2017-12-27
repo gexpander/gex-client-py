@@ -1,8 +1,8 @@
 import gex
 
 class Pin(gex.Unit):
-    def __init__(self, client, name):
-        super().__init__(client, name, 'PIN')
+    def _type(self):
+        return 'PIN'
 
     def off(self):
         self.send(0x00)

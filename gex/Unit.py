@@ -1,11 +1,14 @@
 from gex import Client
 
 class Unit:
-    def __init__(self, client :Client, name :str, type :str):
+    def __init__(self, client :Client, name :str):
         self.client = client
         self.unit_name = name
-        self.unit_type = type
-        self.callsign = client.get_callsign(name, type)
+        self.unit_type = self._type()
+        self.callsign = client.get_callsign(name, self.unit_type)
+
+    def _type(self):
+        raise NotImplementedError("Missing _type() in Unit class \"%s\"" % self.__class__.__name__)
 
     def send(self, cmd, pld=None, id=None):
         """ Send a command to the unit """
