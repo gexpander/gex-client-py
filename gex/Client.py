@@ -38,6 +38,18 @@ class Client:
                 'type': type,
             }
 
+    def ini_read(self):
+        """ Read the settings INI file """
+        buffer = self.bulk_read(cs=None, cmd=gex.MSG_INI_READ)
+        return buffer.decode('utf-8')
+
+    def ini_write(self, buffer):
+        """ Read the settings INI file """
+        if type(buffer) == str:
+            buffer = buffer.encode('utf-8')
+
+        self.bulk_write(cs=None, cmd=gex.MSG_INI_WRITE, bulk=buffer)
+
     def get_callsign(self, name, type = None):
         """ Find unit by name and type """
         u = self.unit_lu[name]

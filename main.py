@@ -5,10 +5,14 @@ import gex
 
 client = gex.Client()
 
-buf = client.bulk_read(None, gex.MSG_INI_READ)
-print(buf.decode('utf-8'))
+s = client.ini_read()
+client.ini_write(s)
 
-client.bulk_write(None, gex.MSG_INI_WRITE, buf)
+if False:
+    buf = client.bulk_read(None, gex.MSG_INI_READ)
+    print(buf.decode('utf-8'))
+
+    client.bulk_write(None, gex.MSG_INI_WRITE, buf)
 
 if False:
     led = gex.Pin(client, 'LED')
