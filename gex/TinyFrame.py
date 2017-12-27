@@ -38,6 +38,8 @@ class TinyFrame:
 
         self.reset_parser()
 
+        self._CKSUM_BYTES = None # will be updated on first compose / accept
+
     def reset_parser(self):
         # parser state: SOF, ID, LEN, TYPE, HCK, PLD, PCK
         self.ps = 'SOF'
@@ -50,8 +52,7 @@ class TinyFrame:
         # received frame
         self.rf = TF_Msg()
 
-    @property
-    def _CKSUM_BYTES(self):
+    def _calc_cksum_bytes(self):
         if self.CKSUM_TYPE == 'none' or self.CKSUM_TYPE is None:
             return 0
         elif self.CKSUM_TYPE == 'xor':
@@ -83,10 +84,6 @@ class TinyFrame:
 
         else:
             raise Exception("Bad cksum type!")
-
-    @property
-    def _SOF_BYTES(self):
-        return 1 if self.USE_SOF_BYTE else 0
 
     def _gen_frame_id(self):
         """
@@ -131,9 +128,11 @@ class TinyFrame:
 
         frame_id can be an ID of an existing session, None for a new session.
         """
+        if self._CKSUM_BYTES is None:
+            self._CKSUM_BYTES = self._calc_cksum_bytes()
 
         if pld is None:
-            pld = b''
+            pld = bytearray()
 
         if id is None:
             id = self._gen_frame_id()
@@ -164,6 +163,9 @@ class TinyFrame:
 
     def accept_byte(self, b):
         # TODO this seems ripe for rewrite to avoid repetitive code
+
+        if self._CKSUM_BYTES is None:
+            self._CKSUM_BYTES = self._calc_cksum_bytes()
 
         if self.ps == 'SOF':
             if self.USE_SOF_BYTE:
