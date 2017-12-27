@@ -8,6 +8,8 @@ client = gex.Client()
 buf = client.bulk_read(None, gex.MSG_INI_READ)
 print(buf.decode('utf-8'))
 
+client.bulk_write(None, gex.MSG_INI_WRITE, buf)
+
 if False:
     led = gex.Pin(client, 'LED')
 
