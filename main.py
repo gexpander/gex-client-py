@@ -30,12 +30,8 @@ if False:
     print('>',pp.bool())
     print('>',pp.str())
 
-if False:
+if True:
     client = gex.Gex()
-
-    # Check connection
-    resp = client.query_raw(type=gex.MSG_PING)
-    print("Ping resp = ", resp.data.decode("ascii"))
 
     # Blink a LED at call-sign 1, command 0x02 = toggle
     for i in range(0,10):
