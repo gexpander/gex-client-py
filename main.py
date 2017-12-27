@@ -2,8 +2,8 @@
 import time
 
 import gex
-from gex.PayloadParser import PayloadParser
-from gex.PayloadBuilder import PayloadBuilder
+from gex import PayloadParser
+from gex import PayloadBuilder
 
 if False:
     pb = PayloadBuilder()
@@ -31,11 +31,11 @@ if False:
     print('>',pp.str())
 
 if True:
-    client = gex.Gex()
+    client = gex.Client()
+    led = gex.Pin(client, 'LED')
 
-    # Blink a LED at call-sign 1, command 0x02 = toggle
     for i in range(0,10):
-        client.send(cs=1, cmd=0x02)
+        led.toggle()
         time.sleep(.1)
 
 
