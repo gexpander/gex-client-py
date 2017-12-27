@@ -50,6 +50,10 @@ class Client:
 
         self.bulk_write(cs=None, cmd=gex.MSG_INI_WRITE, bulk=buffer)
 
+    def ini_persist(self):
+        """ Persist INI settings to Flash """
+        self.send_raw(type=gex.MSG_PERSIST_SETTINGS)
+
     def get_callsign(self, name, type = None):
         """ Find unit by name and type """
         u = self.unit_lu[name]
