@@ -1,6 +1,5 @@
 #!/bin/env python3
 import time
-
 import gex
 
 client = gex.Client()
