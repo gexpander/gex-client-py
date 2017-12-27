@@ -1,5 +1,5 @@
 class TinyFrame:
-    def __init__(self, peer=1):
+    def __init__(self, peer:int=1):
         self.write = None # the writer function should be attached here
 
         self.id_listeners = {}
@@ -64,7 +64,7 @@ class TinyFrame:
         else:
             raise Exception("Bad cksum type!")
 
-    def _cksum(self, buffer):
+    def _cksum(self, buffer) -> int:
         if self.CKSUM_TYPE == 'none' or self.CKSUM_TYPE is None:
             return 0
 
@@ -85,7 +85,7 @@ class TinyFrame:
         else:
             raise Exception("Bad cksum type!")
 
-    def _gen_frame_id(self):
+    def _gen_frame_id(self) -> int:
         """
         Get a new frame ID
         """
@@ -101,15 +101,15 @@ class TinyFrame:
 
         return frame_id
 
-    def _pack(self, num, bytes):
+    def _pack(self, num:int, bytes:int) -> bytes:
         """ Pack a number for a TF field """
         return num.to_bytes(bytes, byteorder='big', signed=False)
 
-    def _unpack(self, buf):
+    def _unpack(self, buf) -> int:
         """ Unpack a number from a TF field """
         return int.from_bytes(buf, byteorder='big', signed=False)
 
-    def query(self, type, listener, pld=None, id=None):
+    def query(self, type:int, listener, pld=None, id:int=None):
         """ Send a query """
         (id, buf) = self._compose(type=type, pld=pld, id=id)
 
@@ -118,11 +118,11 @@ class TinyFrame:
 
         self.write(buf)
 
-    def send(self, type, pld=None, id=None):
+    def send(self, type:int, pld=None, id:int=None):
         """ Like query, but with no listener """
         self.query(type=type, pld=pld, id=id, listener=None)
 
-    def _compose(self, type, pld=None, id=None):
+    def _compose(self, type:int, pld=None, id:int=None) -> tuple:
         """
         Compose a frame.
 
@@ -161,7 +161,7 @@ class TinyFrame:
         for b in bytes:
             self.accept_byte(b)
 
-    def accept_byte(self, b):
+    def accept_byte(self, b:int):
         # TODO this seems ripe for rewrite to avoid repetitive code
 
         if self._CKSUM_BYTES is None:
@@ -304,9 +304,9 @@ class TinyFrame:
             if rv == TF.CLOSE:
                 self.fallback_listener = None
 
-    def add_id_listener(self, id, lst, lifetime=None):
+    def add_id_listener(self, id:int, lst, lifetime:float=None):
         """
-        Add a ID listener that expires in "lifetime" ticks
+        Add a ID listener that expires in "lifetime" seconds
 
         listener function takes two arguments:
         tinyframe instance and a msg object
@@ -317,7 +317,7 @@ class TinyFrame:
             'age': 0,
         }
 
-    def add_type_listener(self, type, lst):
+    def add_type_listener(self, type:int, lst):
         """
         Add a type listener
 

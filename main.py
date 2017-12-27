@@ -9,10 +9,10 @@ if False:
     client.ini_write(s)
 
 if False:
-    buf = client.bulk_read(None, gex.MSG_INI_READ)
+    buf = client.bulk_read(gex.MSG_INI_READ)
     print(buf.decode('utf-8'))
 
-    client.bulk_write(None, gex.MSG_INI_WRITE, buf)
+    client.bulk_write(gex.MSG_INI_WRITE, buf)
 
 if True:
     led = gex.Pin(client, 'LED')
