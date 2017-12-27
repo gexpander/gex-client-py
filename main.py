@@ -1,18 +1,46 @@
 #!/bin/env python3
 import time
 
-from gex import Gex
+import gex
+from gex.PayloadParser import PayloadParser
+from gex.PayloadBuilder import PayloadBuilder
 
-gex = Gex()
+if False:
+    pb = PayloadBuilder()
+    pb.u8(128)
+    pb.i8(-1)
+    pb.u16(1)
+    pb.u32(123456789)
+    pb.float(3.1415)
+    pb.bool(True)
+    pb.bool(False)
+    pb.str("FUCKLE")
 
-# Check connection
-resp = gex.query_raw(type=Gex.MSG_PING)
-print("Ping resp = ", resp.data.decode("ascii"))
+    buf = pb.close()
+    print(buf)
 
-# Blink a LED at call-sign 1, command 0x02 = toggle
-for i in range(0,10):
-    gex.send(cs=1, cmd=0x02)
-    time.sleep(.2)
+    pp = PayloadParser(buf)
+
+    print('>',pp.u8())
+    print('>',pp.i8())
+    print('>',pp.u16())
+    print('>',pp.u32())
+    print('>',pp.float())
+    print('>',pp.bool())
+    print('>',pp.bool())
+    print('>',pp.str())
+
+if False:
+    client = gex.Gex()
+
+    # Check connection
+    resp = client.query_raw(type=gex.MSG_PING)
+    print("Ping resp = ", resp.data.decode("ascii"))
+
+    # Blink a LED at call-sign 1, command 0x02 = toggle
+    for i in range(0,10):
+        client.send(cs=1, cmd=0x02)
+        time.sleep(.1)
 
 
 #
