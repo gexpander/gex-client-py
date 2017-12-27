@@ -8,6 +8,11 @@ class Unit:
         self.unit_type = self._type()
         self.callsign = client.get_callsign(name, self.unit_type)
 
+        def evt_hdl(event: int, payload):
+            self.on_event(event, payload)
+
+        self.client.bind_report_listener(self.callsign, evt_hdl)
+
     def _type(self) -> str:
         raise NotImplementedError("Missing _type() in Unit class \"%s\"" % self.__class__.__name__)
 
@@ -33,3 +38,7 @@ class Unit:
         bulk is the data to write.
         """
         self.client.bulk_write(cs=self.callsign, cmd=cmd, id=id, pld=pld, bulk=bulk)
+
+    def on_event(self, event:int, payload):
+        """ Stub for an event handler """
+        raise NotImplementedError("Missing on_event() in Unit class \"%s\"" % self.__class__.__name__)
