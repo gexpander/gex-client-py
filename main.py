@@ -21,8 +21,20 @@ if False:
         led.toggle()
         time.sleep(.1)
 
-if True:
-    leds = gex.DOut(client, 'TST')
+if False:
+    leds = gex.DOut(client, 'strip')
+
+    nn = 3
+    for i in range(0,20):
+        leds.write(nn)
+        time.sleep(.05)
+        nn<<=1
+        nn|=(nn&0x40)>>6
+        nn=nn&0x3F
+    leds.clear(0xFF)
+
+if False:
+    leds = gex.DOut(client, 'bargraph')
 
     for i in range(0,0x41):
         leds.write(i&0x3F)
@@ -35,3 +47,12 @@ if False:
         #leds.write(i & 0x3F)
         leds.toggle(0xFF)
         time.sleep(.1)
+
+if True:
+    btn = gex.DIn(client, 'btn')
+    strip = gex.DOut(client, 'strip')
+
+    for i in range(0, 10000):
+        b = btn.read()
+        strip.write((b << 2) | ((~b) & 1))
+        time.sleep(.02)

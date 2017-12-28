@@ -1,5 +1,8 @@
 import struct
 
+from gex.TinyFrame import TF_Msg
+
+
 class PayloadParser:
     """
     Utility for parsing a binary payload
@@ -7,6 +10,10 @@ class PayloadParser:
 
     def __init__(self, buf, endian:str='little'):
         """ buf - buffer to parse (bytearray or binary string) """
+
+        if type(buf) == TF_Msg:
+            buf = buf.data
+
         self.buf = buf
         self.ptr = 0
         self.endian = endian

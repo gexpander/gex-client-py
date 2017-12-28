@@ -15,15 +15,15 @@ class PayloadBuilder:
 
     def u8(self, num:int):
         """ Add a uint8_t """
-        self.buf.extend(num.to_bytes(length=1, byteorder=self.endian, signed=False))
+        self.buf.extend((num&0xFF).to_bytes(length=1, byteorder=self.endian, signed=False))
 
     def u16(self, num:int):
         """ Add a uint16_t """
-        self.buf.extend(num.to_bytes(length=2, byteorder=self.endian, signed=False))
+        self.buf.extend((num&0xFFFF).to_bytes(length=2, byteorder=self.endian, signed=False))
 
     def u32(self, num:int):
         """ Add a uint32_t """
-        self.buf.extend(num.to_bytes(length=4, byteorder=self.endian, signed=False))
+        self.buf.extend((num&0xFFFFFFFF).to_bytes(length=4, byteorder=self.endian, signed=False))
 
     def i8(self, num:int):
         """ Add a int8_t """

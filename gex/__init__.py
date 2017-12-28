@@ -9,6 +9,7 @@ from gex.Client import Client
 # import all the units
 from gex.units.Pin import Pin
 from gex.units.DOut import DOut
+from gex.units.DIn import DIn
 
 
 # General, low level
