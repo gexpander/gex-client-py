@@ -79,6 +79,10 @@ class Client:
 
     def get_callsign(self, name:str, type:str = None) -> int:
         """ Find unit by name and type """
+
+        if name not in self.unit_lu:
+            raise Exception("No %s unit called \"%s\"" % (type or '*', name))
+
         u = self.unit_lu[name]
 
         if type is not None:

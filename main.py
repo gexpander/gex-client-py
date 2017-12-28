@@ -14,9 +14,24 @@ if False:
 
     client.bulk_write(gex.MSG_INI_WRITE, buf)
 
-if True:
+if False:
     led = gex.Pin(client, 'LED')
 
     for i in range(0,10):
         led.toggle()
+        time.sleep(.1)
+
+if True:
+    leds = gex.DOut(client, 'TST')
+
+    for i in range(0,0x41):
+        leds.write(i&0x3F)
+        time.sleep(.1)
+
+if False:
+    leds = gex.DOut(client, 'TST')
+
+    for i in range(0, 0x41):
+        #leds.write(i & 0x3F)
+        leds.toggle(0xFF)
         time.sleep(.1)
