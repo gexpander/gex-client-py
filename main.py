@@ -54,6 +54,8 @@ if True:
     neo = gex.Neopixel(client, 'npx')
 
     print('We have %d neopixels.\n' % neo.get_len())
+
+    # generate a little animation...
     for i in range(0,512):
         j = i if i < 256 else 255-(i-256)
         neo.load([0x660000+j, 0x3300FF-j, 0xFFFF00-(j<<8), 0x0000FF+(j<<8)-j])
