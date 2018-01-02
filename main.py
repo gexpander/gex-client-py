@@ -15,13 +15,6 @@ if False:
     client.bulk_write(gex.MSG_INI_WRITE, buf)
 
 if False:
-    led = gex.Pin(client, 'LED')
-
-    for i in range(0,10):
-        led.toggle()
-        time.sleep(.1)
-
-if False:
     leds = gex.DOut(client, 'strip')
 
     nn = 3
@@ -48,7 +41,7 @@ if False:
         leds.toggle(0xFF)
         time.sleep(.1)
 
-if True:
+if False:
     btn = gex.DIn(client, 'btn')
     strip = gex.DOut(client, 'strip')
 
@@ -56,3 +49,13 @@ if True:
         b = btn.read()
         strip.write((b << 2) | ((~b) & 1))
         time.sleep(.02)
+
+if True:
+    neo = gex.Neopixel(client, 'npx')
+
+    print('We have %d neopixels.\n' % neo.get_len())
+    for i in range(0,512):
+        j = i if i < 256 else 255-(i-256)
+        neo.load([0x660000+j, 0x3300FF-j, 0xFFFF00-(j<<8), 0x0000FF+(j<<8)-j])
+        time.sleep(.005)
+

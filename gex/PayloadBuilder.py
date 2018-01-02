@@ -21,6 +21,10 @@ class PayloadBuilder:
         """ Add a uint16_t """
         self.buf.extend((num&0xFFFF).to_bytes(length=2, byteorder=self.endian, signed=False))
 
+    def u24(self, num:int):
+        """ Add a uint24_t (for use with RGB colors) """
+        self.buf.extend((num&0xFFFFFF).to_bytes(length=3, byteorder=self.endian, signed=False))
+
     def u32(self, num:int):
         """ Add a uint32_t """
         self.buf.extend((num&0xFFFFFFFF).to_bytes(length=4, byteorder=self.endian, signed=False))

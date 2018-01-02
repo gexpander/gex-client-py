@@ -45,6 +45,11 @@ class PayloadParser:
         slice = self._slice(2)
         return int.from_bytes(slice, byteorder=self.endian, signed=False)
 
+    def u24(self) -> int:
+        """ Read a uint24_t """
+        slice = self._slice(3)
+        return int.from_bytes(slice, byteorder=self.endian, signed=False)
+
     def u32(self) -> int:
         """ Read a uint32_t """
         slice = self._slice(4)
