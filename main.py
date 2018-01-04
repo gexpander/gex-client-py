@@ -61,18 +61,18 @@ if False:
     for i in range(0,512):
         j = i if i < 256 else 255-(i-256)
         neo.load([0x660000+j, 0x3300FF-j, 0xFFFF00-(j<<8), 0x0000FF+(j<<8)-j])
-        time.sleep(.001)
+        time.sleep(.002)
 
     neo.load([0,0,0,0])
 
+if False:
+    i2c = gex.I2C(client, 'i2c')
 
-i2c = gex.I2C(client, 'i2c')
+    # i2c.write(0x76, payload=[0xD0])
+    # print(i2c.read(0x76, count=1))
 
-# i2c.write(0x76, payload=[0xD0])
-# print(i2c.read(0x76, count=1))
+    print(i2c.read_reg(0x76, 0xD0))
+    print("%x" % i2c.read_reg(0x76, 0xF9, width=3, endian='big'))
 
-print(i2c.read_reg(0x76, 0xD0))
-print("%x" % i2c.read_reg(0x76, 0xF9, width=3, endian='big'))
-
-i2c.write_reg(0x76, 0xF4, 0xFA)
-print(i2c.read_reg(0x76, 0xF4))
+    i2c.write_reg(0x76, 0xF4, 0xFA)
+    print(i2c.read_reg(0x76, 0xF4))

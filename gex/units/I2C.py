@@ -42,7 +42,7 @@ class I2C(gex.Unit):
         """
         pb = self._begin_i2c_pld(address, a10bit)
         pb.u8(reg)
-        pb.u8(width*count) # we assume the device will auto-increment (most do)
+        pb.u16(width*count) # we assume the device will auto-increment (most do)
         resp = self.query(0x03, pb.close())
 
         fields = []
