@@ -10,6 +10,7 @@ from gex.Client import Client
 from gex.units.DOut import DOut
 from gex.units.DIn import DIn
 from gex.units.Neopixel import Neopixel
+from gex.units.I2C import I2C
 
 
 # General, low level
