@@ -61,7 +61,7 @@ if False:
     for i in range(0,512):
         j = i if i < 256 else 255-(i-256)
         neo.load([0x660000+j, 0x3300FF-j, 0xFFFF00-(j<<8), 0x0000FF+(j<<8)-j])
-        time.sleep(.002)
+        time.sleep(.001)
 
     neo.load([0,0,0,0])
 
@@ -76,3 +76,8 @@ if False:
 
     i2c.write_reg(0x76, 0xF4, 0xFA)
     print(i2c.read_reg(0x76, 0xF4))
+
+if True:
+    spi = gex.SPI(client, 'spi')
+    spi.write(0, [0xA1])
+    print("SPI done.")

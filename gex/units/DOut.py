@@ -17,22 +17,22 @@ class DOut(gex.Unit):
         """ Set pins to a value """
         pb = gex.PayloadBuilder()
         pb.u16(pins)
-        self.send(0x00, pb.close())
+        self._send(0x00, pb.close())
 
     def set(self, pins:int):
         """ Set pins high """
         pb = gex.PayloadBuilder()
         pb.u16(pins)
-        self.send(0x01, pb.close())
+        self._send(0x01, pb.close())
 
     def clear(self, pins:int):
         """ Set pins low """
         pb = gex.PayloadBuilder()
         pb.u16(pins)
-        self.send(0x02, pb.close())
+        self._send(0x02, pb.close())
 
     def toggle(self, pins:int):
         """ Toggle pins """
         pb = gex.PayloadBuilder()
         pb.u16(pins)
-        self.send(0x03, pb.close())
+        self._send(0x03, pb.close())

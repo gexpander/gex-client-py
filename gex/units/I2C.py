@@ -20,7 +20,7 @@ class I2C(gex.Unit):
         """
         pb = self._begin_i2c_pld(address, a10bit)
         pb.blob(payload) # payload to write
-        self.query(0x80, pb.close())
+        self._query(0x80, pb.close())
 
     def read(self, address:int, count, a10bit:bool=False):
         """
@@ -28,7 +28,7 @@ class I2C(gex.Unit):
         """
         pb = self._begin_i2c_pld(address, a10bit)
         pb.u16(count) # number of bytes to read
-        self.query(0x01, pb.close())
+        self._query(0x01, pb.close())
 
     def read_reg(self, address:int, reg, width:int=1, a10bit:bool=False, endian='little'):
         """
@@ -43,7 +43,7 @@ class I2C(gex.Unit):
         pb = self._begin_i2c_pld(address, a10bit)
         pb.u8(reg)
         pb.u16(width*count) # we assume the device will auto-increment (most do)
-        resp = self.query(0x03, pb.close())
+        resp = self._query(0x03, pb.close())
 
         fields = []
         pp = gex.PayloadParser(resp.data, endian=endian)
@@ -69,4 +69,4 @@ class I2C(gex.Unit):
         elif width == 4: pb.u32(value)
         else: raise Exception("Bad width")
 
-        self.query(0x82, pb.close())
+        self._query(0x82, pb.close())

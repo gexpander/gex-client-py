@@ -14,6 +14,6 @@ class DIn(gex.Unit):
 
     def read(self):
         """ Read pins """
-        msg = self.query(0x00)
+        msg = self._query(0x00)
         pp = gex.PayloadParser(msg)
         return pp.u16()

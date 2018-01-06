@@ -17,11 +17,15 @@ class Client:
         resp = self.query_raw(type=gex.MSG_PING)
         print("GEX connected, version string: %s" % resp.data.decode('utf-8'))
 
+        # fallback error listener
+        def error_lst(tf :TinyFrame, msg :TF_Msg):
+            raise Exception("ERROR MESSAGE! %s" % msg.data.decode('utf-8'))
+        self.tf.add_type_listener(gex.MSG_ERROR, error_lst)
+
         # lambda
         def unit_repot_lst(tf :TinyFrame, msg :TF_Msg):
             self.handle_unit_report(msg)
             return TF.STAY
-
         self.tf.add_type_listener(gex.MSG_UNIT_REPORT, unit_repot_lst)
 
         self.unit_lu = {}
