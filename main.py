@@ -4,6 +4,8 @@ import gex
 
 client = gex.Client()
 
+#print(client.ini_read())
+
 if False:
     s = client.ini_read()
     client.ini_write(s)
@@ -79,5 +81,4 @@ if False:
 
 if True:
     spi = gex.SPI(client, 'spi')
-    spi.write(0, [0xA1])
-    print("SPI done.")
+    print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))
