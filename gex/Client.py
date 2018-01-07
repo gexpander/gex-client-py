@@ -75,7 +75,10 @@ class Client:
         if type(buffer) == str:
             buffer = buffer.encode('utf-8')
 
-        self.bulk_write(cs=None, cmd=gex.MSG_INI_WRITE, bulk=buffer)
+        pb = gex.PayloadBuilder()
+        pb.u32(len(buffer))
+
+        self.bulk_write(cs=None, pld=pb.close(), cmd=gex.MSG_INI_WRITE, bulk=buffer)
 
     def ini_persist(self):
         """ Persist INI settings to Flash """

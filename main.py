@@ -10,11 +10,14 @@ if False:
     s = client.ini_read()
     client.ini_write(s)
 
-if False:
+if True:
     buf = client.bulk_read(gex.MSG_INI_READ)
     print(buf.decode('utf-8'))
 
-    client.bulk_write(gex.MSG_INI_WRITE, buf)
+    pb = gex.PayloadBuilder()
+    pb.u32(len(buf))
+
+    client.bulk_write(gex.MSG_INI_WRITE, pld=pb.close(), bulk=buf)
 
 if False:
     leds = gex.DOut(client, 'strip')
@@ -52,7 +55,7 @@ if False:
         strip.write((b << 2) | ((~b) & 1))
         time.sleep(.02)
 
-if False:
+if True:
     neo = gex.Neopixel(client, 'npx')
 
     print('We have %d neopixels.\n' % neo.get_len())
@@ -81,4 +84,5 @@ if False:
 
 if True:
     spi = gex.SPI(client, 'spi')
-    print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))
+    spi.multicast(1, [0xDE, 0xAD, 0xBE, 0xEF])
+    print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))#
