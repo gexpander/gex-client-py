@@ -88,7 +88,7 @@ if False:
     spi.multicast(1, [0xDE, 0xAD, 0xBE, 0xEF])
     print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))#
 
-if True:
+if False:
     usart = gex.USART(client, 'serial')
     usart.listen(lambda x: print("RX >%s<" % x))
     for i in range(0,100):
@@ -98,9 +98,9 @@ if True:
 
         # time.sleep(.001)
 
-if False:
+if True:
     usart = gex.USART(client, 'serial')
-    usart.listen(lambda x: print("RX >%s<" % x))
+    usart.listen(lambda x: print(x, end='',flush=True))
     while True:
         client.poll()
         time.sleep(.01)
