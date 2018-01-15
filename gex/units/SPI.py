@@ -8,7 +8,7 @@ class SPI(gex.Unit):
     def _type(self):
         return 'SPI'
 
-    def query(self, slave:int, tbytes, rlen:int, rskip:int=-1):
+    def query(self, slave:int, tbytes, rlen:int, rskip:int=-1, confirm=True):
         """
         Query a slave.
 
@@ -23,21 +23,23 @@ class SPI(gex.Unit):
         pb.u16(rskip)
         pb.u16(rlen)
         pb.blob(tbytes)
+
+        # SPI does not respond if rlen is 0, but can be envorced using 'confirm'
         if rlen > 0:
-            resp = self._query(0, pb.close())
+            resp = self._query(0x00, pb.close())
             return resp.data
         else:
             # write only
-            self._query(0x80, pb.close())
+            self._send(0x00, pb.close(), confirm=confirm)
             return []
 
-    def write(self, slave:int, tbytes):
+    def write(self, slave:int, tbytes, confirm=True):
         """
         Write with no response received
         """
-        self.query(slave, tbytes, rlen=0, rskip=0)
+        self.query(slave, tbytes, rlen=0, rskip=0, confirm=confirm)
 
-    def multicast(self, slaves:int, tbytes):
+    def multicast(self, slaves:int, tbytes, confirm=True):
         """
         Write with multiple slaves at once.
         Slaves is a right-aligned bitmap (eg. pins 0,2,3 would be 0b1101)
@@ -45,5 +47,4 @@ class SPI(gex.Unit):
         pb = gex.PayloadBuilder()
         pb.u16(slaves)
         pb.blob(tbytes)
-        # write only
-        self._query(0x81, pb.close())
+        self._send(0x01, pb.close(), confirm=confirm)

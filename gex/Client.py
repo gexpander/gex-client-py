@@ -41,6 +41,9 @@ class Client:
 
         if callsign in self.report_handlers:
             self.report_handlers[callsign](event, payload)
+        else:
+            print("Unhandled event report: callsign %d, event %d" % (callsign, event))
+            print(payload)
 
     def bind_report_listener(self, callsign:int, listener):
         """ Assign a report listener function to a callsign """

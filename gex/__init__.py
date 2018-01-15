@@ -12,6 +12,7 @@ from gex.units.DIn import DIn
 from gex.units.Neopixel import Neopixel
 from gex.units.I2C import I2C
 from gex.units.SPI import SPI
+from gex.units.USART import USART
 
 
 # General, low level

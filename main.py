@@ -2,15 +2,16 @@
 import time
 import gex
 
-client = gex.Client()
+client = gex.Client(timeout=1.5)
 
 #print(client.ini_read())
 
 if False:
     s = client.ini_read()
+    print(s)
     client.ini_write(s)
 
-if True:
+if False:
     buf = client.bulk_read(gex.MSG_INI_READ)
     print(buf.decode('utf-8'))
 
@@ -55,7 +56,7 @@ if False:
         strip.write((b << 2) | ((~b) & 1))
         time.sleep(.02)
 
-if True:
+if False:
     neo = gex.Neopixel(client, 'npx')
 
     print('We have %d neopixels.\n' % neo.get_len())
@@ -82,7 +83,28 @@ if False:
     i2c.write_reg(0x76, 0xF4, 0xFA)
     print(i2c.read_reg(0x76, 0xF4))
 
-if True:
+if False:
     spi = gex.SPI(client, 'spi')
     spi.multicast(1, [0xDE, 0xAD, 0xBE, 0xEF])
     print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))#
+
+if True:
+    usart = gex.USART(client, 'serial')
+    for i in range(0,100):
+        #             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac bibendum lectus, ut pellentesque sem. Suspendisse ultrices felis eu laoreet luctus. Nam sollicitudin ultrices leo, ac condimentum enim vulputate quis. Suspendisse cursus tortor nibh, ac consectetur eros dapibus quis. Aliquam erat volutpat. Duis sagittis eget nunc nec condimentum. Aliquam erat volutpat. Phasellus molestie sem vitae quam semper convallis.
+
+        usart.write("""_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n""".encode(), sync=True)
+
+        # time.sleep(.001)
+
+if False:
+    usart = gex.USART(client, 'serial')
+    usart.listen(lambda x: print("RX >%s<" % x))
+    while True:
+        client.poll()
+        time.sleep(.01)
+#
+# for n in range(0,100):
+#     print(n)
+#     s = client.ini_read()
+#     client.ini_write(s)

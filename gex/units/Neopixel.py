@@ -14,7 +14,7 @@ class Neopixel(gex.Unit):
         pp = gex.PayloadParser(resp)
         return pp.u16()
 
-    def load(self, colors, reverse=True):
+    def load(self, colors, reverse=True, confirm=True):
         """
         Load colors to the strip.
 
@@ -24,10 +24,10 @@ class Neopixel(gex.Unit):
         pb = gex.PayloadBuilder(endian='big' if reverse else 'little')
         for c in colors:
             pb.u24(c)
-        self._send(0x01, pb.close())
+        self._send(0x01, pb.close(), confirm=confirm)
 
-    def clear(self):
+    def clear(self, confirm=True):
         """
         Reset the strip (set all to black)
         """
-        self._send(0x00)
+        self._send(0x00, confirm=confirm)

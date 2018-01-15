@@ -14,13 +14,13 @@ class I2C(gex.Unit):
         pb.u16(address)
         return pb
 
-    def write(self, address:int, payload, a10bit:bool=False):
+    def write(self, address:int, payload, a10bit:bool=False, confirm=True):
         """
         Write to an address
         """
         pb = self._begin_i2c_pld(address, a10bit)
         pb.blob(payload) # payload to write
-        self._query(0x80, pb.close())
+        self._send(0x00, pb.close(), confirm=confirm)
 
     def read(self, address:int, count, a10bit:bool=False):
         """
@@ -55,7 +55,7 @@ class I2C(gex.Unit):
             else: raise Exception("Bad width")
         return fields
 
-    def write_reg(self, address:int, reg, value:int, width:int=1, a10bit:bool=False, endian='little'):
+    def write_reg(self, address:int, reg, value:int, width:int=1, a10bit:bool=False, endian='little', confirm=True):
         """
         Write a to a single register
         """
@@ -69,4 +69,4 @@ class I2C(gex.Unit):
         elif width == 4: pb.u32(value)
         else: raise Exception("Bad width")
 
-        self._query(0x82, pb.close())
+        self._send(0x02, pb.close(), confirm=confirm)
