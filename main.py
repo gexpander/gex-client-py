@@ -90,6 +90,7 @@ if False:
 
 if True:
     usart = gex.USART(client, 'serial')
+    usart.listen(lambda x: print("RX >%s<" % x))
     for i in range(0,100):
         #             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac bibendum lectus, ut pellentesque sem. Suspendisse ultrices felis eu laoreet luctus. Nam sollicitudin ultrices leo, ac condimentum enim vulputate quis. Suspendisse cursus tortor nibh, ac consectetur eros dapibus quis. Aliquam erat volutpat. Duis sagittis eget nunc nec condimentum. Aliquam erat volutpat. Phasellus molestie sem vitae quam semper convallis.
 

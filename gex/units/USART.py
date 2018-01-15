@@ -19,12 +19,12 @@ class USART(gex.Unit):
 
     def write(self, payload, sync=False, confirm=True):
         """
-        Write bytes. If 'sync' is True, wait for completion.
+        Write bytes. If 'sync' is True, wait for completion. sync implies confirm
         """
         pb = gex.PayloadBuilder()
         pb.blob(payload) # payload to write
 
-        self._send(0x01 if sync else 0x00, pb.close(), confirm=confirm)
+        self._send(0x01 if sync else 0x00, pb.close(), confirm=confirm or sync)
 
     def _on_event(self, event:int, payload):
         if event == 0:
