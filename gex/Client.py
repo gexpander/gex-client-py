@@ -37,10 +37,11 @@ class Client:
         pp = PayloadParser(msg.data)
         callsign = pp.u8()
         event = pp.u8()
+        timestamp = pp.u64()
         payload = pp.tail()
 
         if callsign in self.report_handlers:
-            self.report_handlers[callsign](event, payload)
+            self.report_handlers[callsign](event, payload, timestamp)
         else:
             print("Unhandled event report: callsign %d, event %d" % (callsign, event))
             print(payload)

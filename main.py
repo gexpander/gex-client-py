@@ -111,7 +111,7 @@ if True:
 
     # Two pins are defined, PA10 and PA7. PA10 is the trigger, in the order from smallest to highest number 1
     trig.arm(0b10)
-    trig.on_trigger(0b10, lambda snap: print("snap 0x%X" % snap))
+    trig.on_trigger(0b10, lambda snap,ts: print("snap 0x%X, ts %d" % (snap,ts)))
 
     while True:
         client.poll()

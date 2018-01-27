@@ -27,7 +27,11 @@ class PayloadBuilder:
 
     def u32(self, num:int):
         """ Add a uint32_t """
-        self.buf.extend((num&0xFFFFFFFF).to_bytes(length=4, byteorder=self.endian, signed=False))
+        self.buf.extend(num.to_bytes(length=4, byteorder=self.endian, signed=False))
+
+    def u64(self, num:int):
+        """ Add a uint64_t """
+        self.buf.extend(num.to_bytes(length=8, byteorder=self.endian, signed=False))
 
     def i8(self, num:int):
         """ Add a int8_t """
@@ -40,6 +44,10 @@ class PayloadBuilder:
     def i32(self, num:int):
         """ Add a int32_t """
         self.buf.extend(num.to_bytes(length=4, byteorder=self.endian, signed=True))
+
+    def i64(self, num:int):
+        """ Add a int64_t """
+        self.buf.extend(num.to_bytes(length=8, byteorder=self.endian, signed=True))
 
     def float(self, num:float):
         """ Add a float (4 bytes) """

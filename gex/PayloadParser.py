@@ -55,6 +55,11 @@ class PayloadParser:
         slice = self._slice(4)
         return int.from_bytes(slice, byteorder=self.endian, signed=False)
 
+    def u64(self) -> int:
+        """ Read a uint64_t """
+        slice = self._slice(8)
+        return int.from_bytes(slice, byteorder=self.endian, signed=False)
+
     def i8(self) -> int:
         """ Read a int8_t """
         slice = self._slice(1)
@@ -68,6 +73,11 @@ class PayloadParser:
     def i32(self) -> int:
         """ Read a int32_t """
         slice = self._slice(4)
+        return int.from_bytes(slice, byteorder=self.endian, signed=True)
+
+    def i64(self) -> int:
+        """ Read a int64_t """
+        slice = self._slice(8)
         return int.from_bytes(slice, byteorder=self.endian, signed=True)
 
     def float(self) -> float:

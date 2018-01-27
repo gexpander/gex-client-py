@@ -43,13 +43,14 @@ class DIn(gex.Unit):
 
     def on_trigger(self, sensitive_pins, callback):
         """
-        Assign a trigger callback
+        Assign a trigger callback.
+        Arguments are: pins snapshot, timestamp
         """
         for i in range(0, 16):
             if sensitive_pins & (1 << i):
                 self.handlers[i] = callback
 
-    def _on_event(self, event:int, payload):
+    def _on_event(self, event:int, payload, timestamp:int):
         if event == 0x00:
             # trigger interrupt
             pp = gex.PayloadParser(payload)
@@ -59,4 +60,4 @@ class DIn(gex.Unit):
             for i in range(0,16):
                 if triggersource & (1<<i):
                     if i in self.handlers:
-                        self.handlers[i](snapshot)
+                        self.handlers[i](snapshot, timestamp)
