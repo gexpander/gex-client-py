@@ -12,6 +12,11 @@ class Unit:
             self._on_event(event, payload)
 
         self.client.bind_report_listener(self.callsign, evt_hdl)
+        self._init()
+
+    def _init(self):
+        """ Do post-constructor init """
+        pass
 
     def _type(self) -> str:
         raise NotImplementedError("Missing _type() in Unit class \"%s\"" % self.__class__.__name__)

@@ -21,6 +21,10 @@ class USART(gex.Unit):
         """
         Write bytes. If 'sync' is True, wait for completion. sync implies confirm
         """
+
+        if type(payload) is str:
+            payload = payload.encode('utf-8')
+
         pb = gex.PayloadBuilder()
         pb.blob(payload) # payload to write
 
@@ -30,5 +34,7 @@ class USART(gex.Unit):
         if event == 0:
             # Data received
             if self.handler:
-                data = payload if self.handler_decode is None else payload.decode(self.handler_decode)
+                data = payload if self.handler_decode is None \
+                               else payload.decode(self.handler_decode)
+
                 self.handler(data)

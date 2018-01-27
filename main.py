@@ -4,8 +4,6 @@ import gex
 
 client = gex.Client(timeout=1.5)
 
-#print(client.ini_read())
-
 if False:
     s = client.ini_read()
     print(s)
@@ -98,12 +96,27 @@ if False:
 
         # time.sleep(.001)
 
-if True:
+if False:
     usart = gex.USART(client, 'serial')
     usart.listen(lambda x: print(x, end='',flush=True))
     while True:
         client.poll()
         time.sleep(.01)
+
+if True:
+    print(client.ini_read())
+
+    trig = gex.DIn(client, 'trig')
+    print(trig.read())
+
+    # Two pins are defined, PA10 and PA7. PA10 is the trigger, in the order from smallest to highest number 1
+    trig.arm(0b10)
+    trig.on_trigger(0b10, lambda snap: print("snap 0x%X" % snap))
+
+    while True:
+        client.poll()
+        time.sleep(.01)
+
 #
 # for n in range(0,100):
 #     print(n)
