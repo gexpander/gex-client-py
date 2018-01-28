@@ -2,8 +2,8 @@
 import time
 import gex
 
-transport = gex.RawUSB(sn='0029002F-42365711-32353530')
-#transport = gex.SerialSync(port='/dev/ttyACM0')
+transport = gex.TrxRawUSB(sn='0029002F-42365711-32353530')
+#transport = gex.TrxSerialSync(port='/dev/ttyACM0')
 
 with gex.Client(transport) as client:
 

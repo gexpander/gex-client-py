@@ -38,7 +38,7 @@ class BaseGexTransport:
         raise Exception("Not implemented")
 
 
-class SerialSync (BaseGexTransport):
+class TrxSerialSync (BaseGexTransport):
     """
     Transport based on pySerial, no async support.
     Call poll() to receive spontaneous events or responses.
@@ -91,7 +91,7 @@ class SerialSync (BaseGexTransport):
                     self._listener(rv)
 
 
-class RawUSB (BaseGexTransport):
+class TrxRawUSB (BaseGexTransport):
     """
     pyUSB-based transport with minimal overhead and async IO
     """
