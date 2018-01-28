@@ -2,123 +2,124 @@
 import time
 import gex
 
-client = gex.Client(timeout=1.5)
+transport = gex.RawUSB(sn='0029002F-42365711-32353530')
+#transport = gex.SerialSync(port='/dev/ttyACM0')
 
-if False:
-    s = client.ini_read()
-    print(s)
-    client.ini_write(s)
+with gex.Client(transport) as client:
 
-if False:
-    buf = client.bulk_read(gex.MSG_INI_READ)
-    print(buf.decode('utf-8'))
+    if False:
+        s = client.ini_read()
+        print(s)
+        client.ini_write(s)
 
-    pb = gex.PayloadBuilder()
-    pb.u32(len(buf))
+    if False:
+        buf = client.bulk_read(gex.MSG_INI_READ)
+        print(buf.decode('utf-8'))
 
-    client.bulk_write(gex.MSG_INI_WRITE, pld=pb.close(), bulk=buf)
+        pb = gex.PayloadBuilder()
+        pb.u32(len(buf))
 
-if False:
-    leds = gex.DOut(client, 'strip')
+        client.bulk_write(gex.MSG_INI_WRITE, pld=pb.close(), bulk=buf)
 
-    nn = 3
-    for i in range(0,20):
-        leds.write(nn)
-        time.sleep(.05)
-        nn<<=1
-        nn|=(nn&0x40)>>6
-        nn=nn&0x3F
-    leds.clear(0xFF)
+    if False:
+        leds = gex.DOut(client, 'strip')
 
-if False:
-    leds = gex.DOut(client, 'bargraph')
+        nn = 3
+        for i in range(0,20):
+            leds.write(nn)
+            time.sleep(.05)
+            nn<<=1
+            nn|=(nn&0x40)>>6
+            nn=nn&0x3F
+        leds.clear(0xFF)
 
-    for i in range(0,0x41):
-        leds.write(i&0x3F)
-        time.sleep(.1)
+    if False:
+        leds = gex.DOut(client, 'bargraph')
 
-if False:
-    leds = gex.DOut(client, 'TST')
+        for i in range(0,0x41):
+            leds.write(i&0x3F)
+            time.sleep(.1)
 
-    for i in range(0, 0x41):
-        #leds.write(i & 0x3F)
-        leds.toggle(0xFF)
-        time.sleep(.1)
+    if False:
+        leds = gex.DOut(client, 'TST')
 
-if False:
-    btn = gex.DIn(client, 'btn')
-    strip = gex.DOut(client, 'strip')
+        for i in range(0, 0x41):
+            #leds.write(i & 0x3F)
+            leds.toggle(0xFF)
+            time.sleep(.1)
 
-    for i in range(0, 10000):
-        b = btn.read()
-        strip.write((b << 2) | ((~b) & 1))
-        time.sleep(.02)
+    if False:
+        btn = gex.DIn(client, 'btn')
+        strip = gex.DOut(client, 'strip')
 
-if False:
-    neo = gex.Neopixel(client, 'npx')
+        for i in range(0, 10000):
+            b = btn.read()
+            strip.write((b << 2) | ((~b) & 1))
+            time.sleep(.02)
 
-    print('We have %d neopixels.\n' % neo.get_len())
+    if False:
+        neo = gex.Neopixel(client, 'npx')
 
-    #neo.load([0xF0F0F0,0,0,0xFF0000])
+        print('We have %d neopixels.\n' % neo.get_len())
 
-    # generate a little animation...
-    for i in range(0,512):
-        j = i if i < 256 else 255-(i-256)
-        neo.load([0x660000+j, 0x3300FF-j, 0xFFFF00-(j<<8), 0x0000FF+(j<<8)-j])
-        time.sleep(.001)
+        #neo.load([0xF0F0F0,0,0,0xFF0000])
 
-    neo.load([0,0,0,0])
+        # generate a little animation...
+        for i in range(0,512):
+            j = i if i < 256 else 255-(i-256)
+            neo.load([0x660000+j, 0x3300FF-j, 0xFFFF00-(j<<8), 0x0000FF+(j<<8)-j])
+            time.sleep(.001)
 
-if False:
-    i2c = gex.I2C(client, 'i2c')
+        neo.load([0,0,0,0])
 
-    # i2c.write(0x76, payload=[0xD0])
-    # print(i2c.read(0x76, count=1))
+    if False:
+        i2c = gex.I2C(client, 'i2c')
 
-    print(i2c.read_reg(0x76, 0xD0))
-    print("%x" % i2c.read_reg(0x76, 0xF9, width=3, endian='big'))
+        # i2c.write(0x76, payload=[0xD0])
+        # print(i2c.read(0x76, count=1))
 
-    i2c.write_reg(0x76, 0xF4, 0xFA)
-    print(i2c.read_reg(0x76, 0xF4))
+        print(i2c.read_reg(0x76, 0xD0))
+        print("%x" % i2c.read_reg(0x76, 0xF9, width=3, endian='big'))
 
-if False:
-    spi = gex.SPI(client, 'spi')
-    spi.multicast(1, [0xDE, 0xAD, 0xBE, 0xEF])
-    print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))#
+        i2c.write_reg(0x76, 0xF4, 0xFA)
+        print(i2c.read_reg(0x76, 0xF4))
 
-if False:
-    usart = gex.USART(client, 'serial')
-    usart.listen(lambda x: print("RX >%s<" % x))
-    for i in range(0,100):
-        #             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac bibendum lectus, ut pellentesque sem. Suspendisse ultrices felis eu laoreet luctus. Nam sollicitudin ultrices leo, ac condimentum enim vulputate quis. Suspendisse cursus tortor nibh, ac consectetur eros dapibus quis. Aliquam erat volutpat. Duis sagittis eget nunc nec condimentum. Aliquam erat volutpat. Phasellus molestie sem vitae quam semper convallis.
+    if False:
+        spi = gex.SPI(client, 'spi')
+        spi.multicast(1, [0xDE, 0xAD, 0xBE, 0xEF])
+        print(spi.query(0, [0xDE, 0xAD, 0xBE, 0xEF], rlen=4, rskip=1))#
 
-        usart.write("""_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n""".encode(), sync=True)
+    if False:
+        usart = gex.USART(client, 'serial')
+        usart.listen(lambda x: print("RX >%s<" % x))
+        for i in range(0,100):
+            #             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ac bibendum lectus, ut pellentesque sem. Suspendisse ultrices felis eu laoreet luctus. Nam sollicitudin ultrices leo, ac condimentum enim vulputate quis. Suspendisse cursus tortor nibh, ac consectetur eros dapibus quis. Aliquam erat volutpat. Duis sagittis eget nunc nec condimentum. Aliquam erat volutpat. Phasellus molestie sem vitae quam semper convallis.
 
-        # time.sleep(.001)
+            usart.write("""_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n_.-"_.-"_.-"_.-"_.-"_.-"_.-"_.\r\n""".encode(), sync=True)
 
-if False:
-    usart = gex.USART(client, 'serial')
-    usart.listen(lambda x: print(x, end='',flush=True))
-    while True:
-        client.poll()
-        time.sleep(.01)
+            # time.sleep(.001)
 
-if True:
-    print(client.ini_read())
+    if False:
+        usart = gex.USART(client, 'serial')
+        usart.listen(lambda x: print(x, end='',flush=True))
+        while True:
+            client.poll()
 
-    trig = gex.DIn(client, 'trig')
-    print(trig.read())
+    if True:
+        print(client.ini_read())
 
-    # Two pins are defined, PA10 and PA7. PA10 is the trigger, in the order from smallest to highest number 1
-    trig.arm(0b10)
-    trig.on_trigger(0b10, lambda snap,ts: print("snap 0x%X, ts %d" % (snap,ts)))
+        trig = gex.DIn(client, 'trig')
+        print(trig.read())
 
-    while True:
-        client.poll()
-        time.sleep(.01)
+        # Two pins are defined, PA10 and PA7. PA10 is the trigger, in the order from smallest to highest number 1
+        trig.arm(0b10)
+        trig.on_trigger(0b10, lambda snap,ts: print("snap 0x%X, ts %d" % (snap,ts)))
 
-#
-# for n in range(0,100):
-#     print(n)
-#     s = client.ini_read()
-#     client.ini_write(s)
+        while True:
+            client.poll()
+
+    #
+    # for n in range(0,100):
+    #     print(n)
+    #     s = client.ini_read()
+    #     client.ini_write(s)

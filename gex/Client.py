@@ -1,17 +1,23 @@
-import serial
+import threading
 import gex
-from gex import TinyFrame, PayloadParser, TF, PayloadBuilder, TF_Msg
-
+import time
+from gex import TinyFrame, PayloadParser, TF, PayloadBuilder, TF_Msg, transport
 
 class Client:
     """ GEX client """
 
-    def __init__(self, port:str='/dev/ttyACM0', timeout:float=0.3):
-        """ Set up the client. timeout - timeout for waiting for a response. """
-        self.port = port
-        self.serial = serial.Serial(port=port, timeout=timeout)
+    def __init__(self, transport):
+        """
+        Set up the client, looking up the GEX USB device using the S/N.
+        You may need to configure the udev rule to have direct access.
+        """
+        assert transport is not None
+
+        self.transport = transport
+
         self.tf = TinyFrame()
-        self.tf.write = self._write
+        self.tf.write = self.transport.write
+        self.transport.listen(self.tf.accept)
 
         # test connection
         resp = self.query_raw(type=gex.MSG_PING)
@@ -32,6 +38,17 @@ class Client:
         self.report_handlers = {}
 
         self.load_units()
+
+    def close(self):
+        self.transport.close()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """ End of a with block, close the thread """
+        self.close()
+
+    def __enter__(self):
+        """ This is needed for with blocks to work """
+        return self
 
     def handle_unit_report(self, msg:TF_Msg):
         pp = PayloadParser(msg.data)
@@ -102,36 +119,6 @@ class Client:
 
         return u['callsign']
 
-    def _write(self, data):
-        """ Write bytes to the serial port """
-        self.serial.write(data)
-
-    def poll(self, attempts:int=10):
-        """ Read messages sent by GEX """
-        first = True
-        while attempts > 0:
-            rv = bytearray()
-
-            # Blocking read with a timeout
-            if first:
-                rv.extend(self.serial.read(1))
-                first = False
-
-            # Non-blocking read of the rest
-            rv.extend(self.serial.read(self.serial.in_waiting))
-
-            if 0 == len(rv):
-                # nothing was read
-                if self.tf.ps == 'SOF':
-                    # TF is in base state, we're done
-                    return
-                else:
-                    # Wait for TF to finish the frame
-                    attempts -= 1
-                    first = True
-            else:
-                self.tf.accept(rv)
-
     def send(self, cmd:int, cs:int=None, id:int=None, pld=None, listener=None):
         """ Send a command to a unit. If cs is None, cmd is used as message type """
         if cs is None:
@@ -155,7 +142,9 @@ class Client:
 
         self.send(cs=cs, cmd=cmd, id=id, pld=pld, listener=lst)
         # Wait for the response (hope no unrelated frame comes in instead)
-        self.poll()
+
+        # timeout after 3s
+        self.transport.poll(3, lambda: self._theframe is not None)
 
         if self._theframe is None:
             raise Exception("No response to query")
@@ -164,6 +153,33 @@ class Client:
             raise Exception("Error response: %s" % self._theframe.data.decode('utf-8'))
 
         return self._theframe
+
+    def query_async(self, cmd:int, cs:int=None, id:int=None, pld=None, callback=None):
+        """ Query a unit. If cs is None, cmd is used as message type """
+
+        assert callback is not None
+
+        def lst(tf, frame):
+            if frame.type == gex.MSG_ERROR:
+                raise Exception("Error response: %s" % self._theframe.data.decode('utf-8'))
+
+            callback(frame)
+            return TF.CLOSE
+
+        self.send(cs=cs, cmd=cmd, id=id, pld=pld, listener=lst)
+
+    def query_raw_async(self, type:int, id:int=None, pld=None, callback=None):
+        """ Query GEX, without addressing a unit """
+        assert callback is not None
+
+        return self.query_async(cs=None, cmd=type, id=id, pld=pld, callback=callback)
+
+    def poll(self, timeout=0.1, testfunc=None):
+        """
+        Wait for new data or testfunc to return True
+        (e.g. checking if an expected frame was received)
+        """
+        self.transport.poll(timeout, testfunc)
 
     def query_raw(self, type:int, id:int=None, pld=None) -> TF_Msg:
         """ Query GEX, without addressing a unit """

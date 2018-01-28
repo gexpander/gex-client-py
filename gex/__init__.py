@@ -5,6 +5,8 @@ from gex.PayloadParser import PayloadParser
 from gex.TinyFrame import TinyFrame, TF_Msg, TF
 from gex.Unit import Unit
 from gex.Client import Client
+from gex.transport import RawUSB
+from gex.transport import SerialSync
 
 # import all the units
 from gex.units.DOut import DOut
