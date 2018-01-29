@@ -193,8 +193,8 @@ class TrxRawUSB (BaseGexTransport):
         # Using time.sleep() would block for too long. Instead we release the semaphore on each Rx chunk of data
         # and then check if it's what we wanted (let TF handle it and call the listener)
         start = time.time()
-        while time.time() - start < timeout:
-            self.dataSem.acquire()
+        while (time.time() - start) < timeout:
+            self.dataSem.acquire(True, 0.1)
             if testfunc is None or testfunc():
                 break
         pass

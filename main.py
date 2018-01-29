@@ -12,6 +12,16 @@ with gex.Client(transport) as client:
         print(s)
         client.ini_write(s)
 
+    if True:
+        ow = gex.OneWire(client, 'ow')
+        resp = ow.test()
+        print(resp)
+
+        pp = gex.PayloadParser(resp.data)
+        print("Temperature   %f" % (pp.i16()/2))
+        print("Count_remain  %d" % pp.u8())
+        print("Count_per_deg %d" % pp.u8())
+
     if False:
         buf = client.bulk_read(gex.MSG_INI_READ)
         print(buf.decode('utf-8'))
@@ -105,7 +115,7 @@ with gex.Client(transport) as client:
         while True:
             client.poll()
 
-    if True:
+    if False:
         print(client.ini_read())
 
         trig = gex.DIn(client, 'trig')

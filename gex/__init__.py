@@ -15,6 +15,7 @@ from gex.units.Neopixel import Neopixel
 from gex.units.I2C import I2C
 from gex.units.SPI import SPI
 from gex.units.USART import USART
+from gex.units.OneWire import OneWire
 
 
 # General, low level
