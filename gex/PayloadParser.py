@@ -27,6 +27,10 @@ class PayloadParser:
         self.ptr += n
         return slice
 
+    def length(self) -> int:
+        """ Measure the tail """
+        return len(self.buf) - self.ptr
+
     def rewind(self):
         """ Reset the slice pointer to the beginning """
         self.ptr = 0

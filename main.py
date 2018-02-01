@@ -12,15 +12,55 @@ with gex.Client(transport) as client:
         print(s)
         client.ini_write(s)
 
+    # search the bus
+    if False:
+        ow = gex.OneWire(client, 'ow')
+        print("Presence: ", ow.test_presence())
+        print("Devices:", ow.search())
+
+    # search the bus for alarm
+    if False:
+        ow = gex.OneWire(client, 'ow')
+        print("Presence: ", ow.test_presence())
+        print("Devices w alarm:", ow.search(alarm=True))
+
+    # simple 1w check
     if True:
         ow = gex.OneWire(client, 'ow')
-        resp = ow.test()
-        print(resp)
+        print("Presence: ", ow.test_presence())
+        print("ROM: 0x%016x" % ow.read_address())
+        print("Scratch:", ow.query([0xBE], 9, as_array=True))
 
-        pp = gex.PayloadParser(resp.data)
-        print("Temperature   %f" % (pp.i16()/2))
-        print("Count_remain  %d" % pp.u8())
-        print("Count_per_deg %d" % pp.u8())
+    # testing ds1820 temp meas without polling
+    if False:
+        ow = gex.OneWire(client, 'ow')
+        print("Presence: ", ow.test_presence())
+        print("Starting measure...")
+        ow.write([0x44])
+        time.sleep(1)
+        print("Scratch:", ow.query([0xBE], 9))
+
+    # testing ds1820 temp meas with polling
+    if True:
+        ow = gex.OneWire(client, 'ow')
+        print("Presence: ", ow.test_presence())
+        print("Starting measure...")
+        ow.write([0x44])
+        ow.wait_ready()
+        data = ow.query([0xBE], 9)
+
+        pp = gex.PayloadParser(data)
+
+        temp = pp.i16()/2.0
+        th = pp.i8()
+        tl = pp.i8()
+        reserved = pp.i16()
+        remain = float(pp.u8())
+        perc = float(pp.u8())
+
+        realtemp = temp - 0.25+(perc-remain)/perc
+        print("Temperature = %f °C (th %d, tl %d)" % (realtemp, th, tl))
+
 
     if False:
         buf = client.bulk_read(gex.MSG_INI_READ)
