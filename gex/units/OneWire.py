@@ -40,28 +40,24 @@ class OneWire(gex.Unit):
 
         return devices
 
-    def query(self, request, rcount, addr=None, as_array=False):
+    def query(self, request, rcount, addr=0, verify=True, as_array=False):
         """ Query a device """
         pb = gex.PayloadBuilder()
-        if addr is not None:
-            pb.u64(addr)
-
+        pb.u64(addr)
         pb.u16(rcount)
-
+        pb.bool(verify)
         pb.blob(request)
 
-        resp = self._query(11 if addr is None else 13, pb.close())
+        resp = self._query(11, pb.close())
         return resp.data if not as_array else list(resp.data)
 
-    def write(self, payload, addr=None, confirm=True):
+    def write(self, payload, addr=0, confirm=True):
         """ Write to a device """
         pb = gex.PayloadBuilder()
-        if addr is not None:
-            pb.u64(addr)
-
+        pb.u64(addr)
         pb.blob(payload)
 
-        self._send(10 if addr is None else 12, pb.close(), confirm=confirm)
+        self._send(10, pb.close(), confirm=confirm)
 
     def wait_ready(self):
         """ Wait for DS18x20 to complete measurement (or other chip using the same polling mechanism) """

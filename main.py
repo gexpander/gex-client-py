@@ -13,9 +13,8 @@ with gex.Client(transport) as client:
         client.ini_write(s)
 
     # search the bus
-    if False:
+    if True:
         ow = gex.OneWire(client, 'ow')
-        print("Presence: ", ow.test_presence())
         print("Devices:", ow.search())
 
     # search the bus for alarm
@@ -25,11 +24,11 @@ with gex.Client(transport) as client:
         print("Devices w alarm:", ow.search(alarm=True))
 
     # simple 1w check
-    if True:
+    if False:
         ow = gex.OneWire(client, 'ow')
         print("Presence: ", ow.test_presence())
         print("ROM: 0x%016x" % ow.read_address())
-        print("Scratch:", ow.query([0xBE], 9, as_array=True))
+        print("Scratch:", ow.query([0xBE], rcount=9, addr=0x7100080104c77610, as_array=True))
 
     # testing ds1820 temp meas without polling
     if False:
