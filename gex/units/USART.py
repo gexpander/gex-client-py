@@ -1,4 +1,6 @@
 import gex
+from gex.Client import EventReport
+
 
 class USART(gex.Unit):
     """
@@ -32,11 +34,11 @@ class USART(gex.Unit):
 
         self._send(0x01 if sync else 0x00, pb.close(), confirm=confirm or sync)
 
-    def _on_event(self, event:int, payload, timestamp:int):
-        if event == 0:
+    def _on_event(self, evt:EventReport):
+        if evt.code == 0:
             # Data received
             if self.handler:
-                data = payload if self.handler_decode is None \
-                               else payload.decode(self.handler_decode)
+                data = evt.payload if self.handler_decode is None \
+                               else evt.payload.decode(self.handler_decode)
 
-                self.handler(data, timestamp)
+                self.handler(data, evt.timestamp)

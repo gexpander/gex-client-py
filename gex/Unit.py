@@ -1,4 +1,5 @@
 from gex import Client, TF_Msg
+from gex.Client import EventReport
 
 
 class Unit:
@@ -8,8 +9,9 @@ class Unit:
         self.unit_type = self._type()
         self.callsign = client.get_callsign(name, self.unit_type)
 
-        def evt_hdl(event: int, payload, timestamp):
-            self._on_event(event, payload, timestamp)
+        # need intermediate function because the method also takes 'self'
+        def evt_hdl(evt:EventReport):
+            self._on_event(evt)
 
         self.client.bind_report_listener(self.callsign, evt_hdl)
         self._init()
@@ -25,15 +27,27 @@ class Unit:
         """
         Send a command to the unit.
         If 'confirm' is True, will ask for confirmation and throw an error if not received
+
+        Returns frame ID
         """
         if confirm:
-            self._query(cmd|0x80, pld, id)
+            msg = self._query(cmd|0x80, pld, id)
+            return msg.id
         else:
-            self.client.send(cs=self.callsign, cmd=cmd, pld=pld, id=id)
+            return self.client.send(cs=self.callsign, cmd=cmd, pld=pld, id=id)
 
     def _query(self, cmd:int, pld=None, id:int=None) -> TF_Msg:
         """ Query the unit. Returns TF_Msg """
         return self.client.query(cs=self.callsign, cmd=cmd, pld=pld, id=id)
+
+    def _query_async(self, cmd:int, callback, pld=None, id:int=None):
+        """
+        Query the unit without waiting for response.
+        The callback is fired for each frame; returns TF.CLOSE or TF.STAY
+
+        Returns frame ID
+        """
+        return self.client.query_async(cs=self.callsign, cmd=cmd, pld=pld, id=id, callback=callback)
 
     def _bulk_read(self, cmd:int, pld=None, id:int=None, chunk:int=1024) -> bytearray:
         """
@@ -50,6 +64,6 @@ class Unit:
         """
         self.client.bulk_write(cs=self.callsign, cmd=cmd, id=id, pld=pld, bulk=bulk)
 
-    def _on_event(self, event:int, payload, timestamp:int):
+    def _on_event(self, evt:EventReport):
         """ Stub for an event handler """
         raise NotImplementedError("Missing _on_event() in Unit class \"%s\"" % self.__class__.__name__)

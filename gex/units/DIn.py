@@ -1,4 +1,6 @@
 import gex
+from gex.Client import EventReport
+
 
 class DIn(gex.Unit):
     """
@@ -50,14 +52,14 @@ class DIn(gex.Unit):
             if sensitive_pins & (1 << i):
                 self.handlers[i] = callback
 
-    def _on_event(self, event:int, payload, timestamp:int):
-        if event == 0x00:
+    def _on_event(self, evt:EventReport):
+        if evt.code == 0x00:
             # trigger interrupt
-            pp = gex.PayloadParser(payload)
+            pp = gex.PayloadParser(evt.payload)
             triggersource = pp.u16()
             snapshot = pp.u16()
 
             for i in range(0,16):
                 if triggersource & (1<<i):
                     if i in self.handlers:
-                        self.handlers[i](snapshot, timestamp)
+                        self.handlers[i](snapshot, evt.timestamp)

@@ -16,6 +16,7 @@ from gex.units.I2C import I2C
 from gex.units.SPI import SPI
 from gex.units.USART import USART
 from gex.units.OneWire import OneWire
+from gex.units.ADC import ADC
 
 
 # General, low level

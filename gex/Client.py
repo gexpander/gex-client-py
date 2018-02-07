@@ -3,6 +3,14 @@ import gex
 import time
 from gex import TinyFrame, PayloadParser, TF, PayloadBuilder, TF_Msg, transport
 
+class EventReport:
+    def __init__(self, msg:TF_Msg, cs:int, event:int, timestamp:int, payload):
+        self.msg = msg
+        self.callsign = cs
+        self.code = event
+        self.timestamp = timestamp
+        self.payload = payload
+
 class Client:
     """ GEX client """
 
@@ -57,8 +65,10 @@ class Client:
         timestamp = pp.u64()
         payload = pp.tail()
 
+        report = EventReport(msg=msg, cs=callsign, event=event, timestamp=timestamp, payload=payload)
+
         if callsign in self.report_handlers:
-            self.report_handlers[callsign](event, payload, timestamp)
+            self.report_handlers[callsign](report)
         else:
             print("Unhandled event report: callsign %d, event %d" % (callsign, event))
             print(payload)
@@ -120,7 +130,10 @@ class Client:
         return u['callsign']
 
     def send(self, cmd:int, cs:int=None, id:int=None, pld=None, listener=None):
-        """ Send a command to a unit. If cs is None, cmd is used as message type """
+        """
+        Send a command to a unit. If cs is None, cmd is used as message type
+        Returns the ID
+        """
         if cs is None:
             return self.tf.query(type=cmd, id=id, pld=pld, listener=listener)
 
@@ -129,10 +142,13 @@ class Client:
 
         buf = bytearray([cs, cmd])
         buf.extend(pld)
-        self.tf.query(type=gex.MSG_UNIT_REQUEST, id=id, pld=buf, listener=listener)
+        return self.tf.query(type=gex.MSG_UNIT_REQUEST, id=id, pld=buf, listener=listener)
 
     def query(self, cmd:int, cs:int=None, id:int=None, pld=None) -> TF_Msg:
-        """ Query a unit. If cs is None, cmd is used as message type """
+        """
+        Query a unit. If cs is None, cmd is used as message type
+        Returns the message
+        """
 
         self._theframe = None
 
@@ -155,7 +171,10 @@ class Client:
         return self._theframe
 
     def query_async(self, cmd:int, cs:int=None, id:int=None, pld=None, callback=None):
-        """ Query a unit. If cs is None, cmd is used as message type """
+        """
+        Query a unit. If cs is None, cmd is used as message type
+        Returns frame ID
+        """
 
         assert callback is not None
 
@@ -163,16 +182,16 @@ class Client:
             if frame.type == gex.MSG_ERROR:
                 raise Exception("Error response: %s" % self._theframe.data.decode('utf-8'))
 
-            callback(frame)
-            return TF.CLOSE
+            rv = callback(frame)
+            return rv if rv is not None else TF.CLOSE
 
-        self.send(cs=cs, cmd=cmd, id=id, pld=pld, listener=lst)
+        return self.send(cs=cs, cmd=cmd, id=id, pld=pld, listener=lst)
 
     def query_raw_async(self, type:int, id:int=None, pld=None, callback=None):
         """ Query GEX, without addressing a unit """
         assert callback is not None
 
-        return self.query_async(cs=None, cmd=type, id=id, pld=pld, callback=callback)
+        self.query_async(cs=None, cmd=type, id=id, pld=pld, callback=callback)
 
     def poll(self, timeout=0.1, testfunc=None):
         """

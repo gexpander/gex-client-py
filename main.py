@@ -8,12 +8,37 @@ transport = gex.TrxRawUSB(sn='0029002F-42365711-32353530')
 with gex.Client(transport) as client:
 
     if False:
+        adc = gex.ADC(client, 'adc')
+        print("Enabled channels:", adc.get_channels())
+
+        adc.set_smoothing_factor(0.9)
+
+        while True:
+            raw = adc.read_raw()
+            smooth = adc.read_smooth()
+            print("IN1 = %d (%.2f), Tsens = %d (%.2f), Vrefint = %d (%.2f)" % (raw[1], smooth[1],
+                                                                               raw[16], smooth[16],
+                                                                               raw[17], smooth[17]))
+            time.sleep(0.5)
+
+    if True:
+        adc = gex.ADC(client, 'adc')
+        # adc.setup_trigger(1, 700, 10, auto=True, edge="both", holdoff=5000)
+        # adc.arm()
+        # adc.disarm()
+        # adc.force()
+
+        # time.sleep(1)
+        adc.capture(7)
+        # adc.abort()
+
+    if False:
         s = client.ini_read()
         print(s)
         client.ini_write(s)
 
     # search the bus
-    if True:
+    if False:
         ow = gex.OneWire(client, 'ow')
         print("Devices:", ow.search())
 
@@ -40,7 +65,7 @@ with gex.Client(transport) as client:
         print("Scratch:", ow.query([0xBE], 9))
 
     # testing ds1820 temp meas with polling
-    if True:
+    if False:
         ow = gex.OneWire(client, 'ow')
         print("Presence: ", ow.test_presence())
         print("Starting measure...")

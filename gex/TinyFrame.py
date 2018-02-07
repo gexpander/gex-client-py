@@ -51,6 +51,10 @@ class TinyFrame:
         self._CKSUM_BYTES = None # will be updated on first compose / accept
 
     def reset_parser(self):
+        """
+        Reset the parser to its initial state
+        """
+
         # parser state: SOF, ID, LEN, TYPE, HCK, PLD, PCK
         self.ps = 'SOF'
         # buffer for receiving bytes
@@ -63,6 +67,9 @@ class TinyFrame:
         self.rf = TF_Msg()
 
     def _calc_cksum_bytes(self):
+        """
+        Get nbr of bytes needed for the checksum
+        """
         if self.CKSUM_TYPE == 'none' or self.CKSUM_TYPE is None:
             return 0
         elif self.CKSUM_TYPE == 'xor':
@@ -75,6 +82,9 @@ class TinyFrame:
             raise Exception("Bad cksum type!")
 
     def _cksum(self, buffer) -> int:
+        """
+        Compute a checksum of the given buffer.
+        """
         if self.CKSUM_TYPE == 'none' or self.CKSUM_TYPE is None:
             return 0
 
@@ -112,25 +122,34 @@ class TinyFrame:
         return frame_id
 
     def _pack(self, num:int, bytes:int) -> bytes:
-        """ Pack a number for a TF field """
+        """
+        Pack a number for a TF field
+        """
         return num.to_bytes(bytes, byteorder='big', signed=False)
 
     def _unpack(self, buf) -> int:
-        """ Unpack a number from a TF field """
+        """
+        Unpack a number from a TF field
+        """
         return int.from_bytes(buf, byteorder='big', signed=False)
 
     def query(self, type:int, listener, pld=None, id:int=None):
-        """ Send a query """
+        """
+        Send a query. Returns its ID
+        """
         (id, buf) = self._compose(type=type, pld=pld, id=id)
 
         if listener is not None:
             self.add_id_listener(id, listener)
 
         self.write(buf)
+        return id
 
     def send(self, type:int, pld=None, id:int=None):
-        """ Like query, but with no listener """
-        self.query(type=type, pld=pld, id=id, listener=None)
+        """
+        Like query, but with no listener. Returns the ID
+        """
+        return self.query(type=type, pld=pld, id=id, listener=None)
 
     def _compose(self, type:int, pld=None, id:int=None) -> tuple:
         """
@@ -172,6 +191,10 @@ class TinyFrame:
             self.accept_byte(b)
 
     def accept_byte(self, b:int):
+        """
+        Handle a received byte
+        """
+
         # TODO this seems ripe for rewrite to avoid repetitive code
 
         if self._CKSUM_BYTES is None:
@@ -284,6 +307,9 @@ class TinyFrame:
             return
 
     def handle_rx_frame(self):
+        """
+        Process a received and verified frame by calling a listener.
+        """
         frame = self.rf
 
         if frame.id in self.id_listeners and self.id_listeners[frame.id] is not None:
@@ -314,6 +340,12 @@ class TinyFrame:
             if rv == TF.CLOSE:
                 self.fallback_listener = None
 
+    def remove_id_listener(self, id:int):
+        """
+        Remove a ID listener
+        """
+        self.id_listeners[id] = None
+
     def add_id_listener(self, id:int, lst, lifetime:float=None):
         """
         Add a ID listener that expires in "lifetime" seconds
@@ -323,7 +355,7 @@ class TinyFrame:
         """
         self.id_listeners[id] = {
             'fn': lst,
-            'lifetime': lifetime,
+            'lifetime': lifetime, # TODO implement timeouts
             'age': 0,
         }
 
