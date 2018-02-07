@@ -21,7 +21,7 @@ class PayloadParser:
     def _slice(self, n:int) -> bytearray:
         """ Extract a slice and advance the read pointer for the next slice """
         if self.ptr + n > len(self.buf):
-            raise Exception("Out of bounds")
+            raise Exception("Payload parser underrun")
 
         slice = self.buf[self.ptr:self.ptr + n]
         self.ptr += n

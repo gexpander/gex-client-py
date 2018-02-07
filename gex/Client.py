@@ -42,6 +42,11 @@ class Client:
             return TF.STAY
         self.tf.add_type_listener(gex.MSG_UNIT_REPORT, unit_repot_lst)
 
+        # fallback error listener
+        def fallback_lst(tf :TinyFrame, msg :TF_Msg):
+            raise Exception("UNHANDLED MESSAGE! %s" % msg.data.decode('utf-8'))
+        self.tf.add_fallback_listener(fallback_lst)
+
         self.unit_lu = {}
         self.report_handlers = {}
 

@@ -264,6 +264,7 @@ class TinyFrame:
                 actual = self._cksum(self.rpayload)
 
                 if hck != actual:
+                    print("[TF] Header checksum mismatch")
                     self.reset_parser()
                 else:
                     if self.rf.len == 0:
@@ -300,6 +301,7 @@ class TinyFrame:
                 actual = self._cksum(self.rpayload)
 
                 if pck != actual:
+                    print("[TF] Payload checksum mismatch")
                     self.reset_parser()
                 else:
                     self.handle_rx_frame()

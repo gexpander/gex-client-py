@@ -23,13 +23,50 @@ with gex.Client(transport) as client:
 
     if True:
         adc = gex.ADC(client, 'adc')
-        # adc.setup_trigger(1, 700, 10, auto=True, edge="both", holdoff=5000)
-        # adc.arm()
-        # adc.disarm()
+
+        print(adc.set_sample_rate(40000))
+
+        # adc.stream_start(lambda data: print(data))
+        # time.sleep(5)
+        # adc.stream_stop()
+        # time.sleep(.1)
+        # print(adc.get_sample_rate())
+        # time.sleep(.1)
+
+        # adc.stream_stop()
+        # time.sleep(5)
+
+        # print(adc.capture(200, 5))
+
+        adc.setup_trigger(channel=1,
+                          level=700,
+                          count=100,
+                          pretrigger=15,
+                          auto=True,
+                          edge="falling",
+                          holdoff=200,
+                          handler=lambda rpt: print("Report: %s" % rpt))
+
+        print("Armed")
+        adc.arm()
+        print("Sleep...")
         # adc.force()
+        #
+        # # adc.disarm()
+        time.sleep(5)
+        adc.disarm()
+
+        # print(adc.capture(200, 50))
+
+        # adc.stream_start(lambda data: print(data))
+        # time.sleep(20)
+        # adc.stream_stop()
+
+
+        # print(adc.read_raw())
 
         # time.sleep(1)
-        adc.capture(7)
+        # print("Rx: ", resp)
         # adc.abort()
 
     if False:
