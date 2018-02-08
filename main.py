@@ -1,5 +1,8 @@
 #!/bin/env python3
 import time
+
+from matplotlib import pyplot as plt
+
 import gex
 
 transport = gex.TrxRawUSB(sn='0029002F-42365711-32353530')
@@ -24,11 +27,46 @@ with gex.Client(transport) as client:
     if True:
         adc = gex.ADC(client, 'adc')
 
-        print(adc.set_sample_rate(40000))
+        fs = adc.set_sample_rate(1000)
 
-        # adc.stream_start(lambda data: print(data))
-        # time.sleep(5)
+        data = None
+
+        def capture(rpt):
+            global data
+            print("trig'd, %s" % rpt)
+            data = rpt.data
+
+        # adc.setup_trigger(channel=1,
+        #                   level=500,
+        #                   count=100,
+        #                   pretrigger=100,
+        #                   auto=False,
+        #                   edge="rising",
+        #                   holdoff=200,
+        #                   handler=capture)
+        #
+        # adc.arm()
+        # time.sleep(2)
+
+        data = adc.capture(1000)
+        #plt.hist(data) #, 'r.', lw=1)
+        plt.magnitude_spectrum(data[:,0], Fs=fs, scale='dB', color='C1')
+        plt.show()
+
+        # def lst(data):
+        #     if data is not None:
+        #         print("Rx OK") #data
+        #     else:
+        #         print("Closed.")
+
+        # adc.stream_start(lst)
+        time.sleep(3)
         # adc.stream_stop()
+        # print("Done.")
+
+
+
+
         # time.sleep(.1)
         # print(adc.get_sample_rate())
         # time.sleep(.1)
@@ -38,23 +76,23 @@ with gex.Client(transport) as client:
 
         # print(adc.capture(200, 5))
 
-        adc.setup_trigger(channel=1,
-                          level=700,
-                          count=100,
-                          pretrigger=15,
-                          auto=True,
-                          edge="falling",
-                          holdoff=200,
-                          handler=lambda rpt: print("Report: %s" % rpt))
-
-        print("Armed")
-        adc.arm()
-        print("Sleep...")
-        # adc.force()
+        # adc.setup_trigger(channel=1,
+        #                   level=700,
+        #                   count=100,
+        #                   pretrigger=15,
+        #                   auto=True,
+        #                   edge="falling",
+        #                   holdoff=200,
+        #                   handler=lambda rpt: print("Report: %s" % rpt))
         #
-        # # adc.disarm()
-        time.sleep(5)
-        adc.disarm()
+        # print("Armed")
+        # adc.arm()
+        # print("Sleep...")
+        # # adc.force()
+        # #
+        # # # adc.disarm()
+        # time.sleep(5)
+        # adc.disarm()
 
         # print(adc.capture(200, 50))
 

@@ -44,7 +44,12 @@ class Client:
 
         # fallback error listener
         def fallback_lst(tf :TinyFrame, msg :TF_Msg):
-            raise Exception("UNHANDLED MESSAGE! %s" % msg.data.decode('utf-8'))
+            try:
+                pld_as_s = msg.data.decode('utf-8')
+            except UnicodeDecodeError:
+                pld_as_s = str(msg.data)
+            raise Exception("UNHANDLED MESSAGE! %s" % pld_as_s)
+
         self.tf.add_fallback_listener(fallback_lst)
 
         self.unit_lu = {}

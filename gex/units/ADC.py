@@ -1,5 +1,7 @@
 import array
 
+import time
+
 import gex
 from gex import TF, TF_Msg
 from gex.Client import EventReport
@@ -379,10 +381,11 @@ class ADC(gex.Unit):
 
         self._query_async(cmd=CMD_STREAM_START, callback=self._on_stream_capt)
 
-    def stream_stop(self, confirm=True):
+    def stream_stop(self, delay=0.1, confirm=True):
         """ Stop a stream """
         if not self._stream_running:
             raise Exception("Not streaming")
 
-        self._stream_listener = None
         self._send(cmd=CMD_STREAM_STOP, confirm=confirm)
+        time.sleep(delay)
+        self._stream_listener = None
