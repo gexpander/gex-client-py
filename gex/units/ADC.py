@@ -23,6 +23,8 @@ CMD_STREAM_START = 26
 CMD_STREAM_STOP = 27
 CMD_SET_SMOOTHING_FACTOR = 28
 CMD_SET_SAMPLE_RATE = 29
+CMD_ENABLE_CHANNELS = 30
+CMD_SET_SAMPLE_TIME = 31
 
 EVT_CAPT_START = 50
 EVT_CAPT_MORE = 51
@@ -59,6 +61,7 @@ class ADC(gex.Unit):
         self._stream_listener = None
 
         self.channels = self.get_channels()
+        (_, self.sample_rate) = self.get_sample_rate()
 
     def _on_trig_capt(self, msg:TF_Msg):
         pp = gex.PayloadParser(msg.data)
@@ -122,7 +125,7 @@ class ADC(gex.Unit):
         Handle a trigger or stream start event.
 
         - EVT_CAPT_START
-          First frame payload: edge:u8, pretrig_len:u16, payload:tail
+          First frame payload: edge:u8, pretrig_len:u32, payload:tail
 
           Following are plain TF frames with the same ID, each prefixed with a sequence number in 1 byte.
           Type EVT_CAPT_MORE or EVT_CAPT_DONE indicate whether this is the last frame of the sequence,
@@ -139,7 +142,7 @@ class ADC(gex.Unit):
             self._trig_ts = evt.timestamp
             self._trig_buf = bytearray()
 
-            self._trig_pretrig_len = pp.u16()
+            self._trig_pretrig_len = pp.u32()
 
             self._trig_edge = pp.u8()
 
@@ -168,7 +171,15 @@ class ADC(gex.Unit):
         req = pp.u32()
         real = pp.float()
 
+        self.sample_rate = real
+
         return real
+
+    def set_sample_time(self, sample_time:int, confirm=True):
+        """ Set sample time. Values 0-7 """
+        pb = gex.PayloadBuilder()
+        pb.u8(sample_time)
+        self._send(CMD_SET_SAMPLE_TIME, pld=pb.close(), confirm=confirm)
 
     def get_sample_rate(self):
         """
@@ -219,7 +230,9 @@ class ADC(gex.Unit):
         """ Remove the trigger handler """
         self.on_trigger(None)
 
-    def setup_trigger(self, channel, level, count, edge='rising', pretrigger=0, holdoff=100, auto=False, confirm=True, handler=None):
+    def setup_trigger(self, channel, level, count,
+                      edge='rising', pretrigger=0, holdoff=100,
+                      auto=False, confirm=True, handler=None):
         """
         Configure a trigger.
 
@@ -247,7 +260,7 @@ class ADC(gex.Unit):
         pb.u8(channel)
         pb.u16(level)
         pb.u8(nedge)
-        pb.u16(pretrigger)
+        pb.u32(pretrigger)
         pb.u32(count)
         pb.u16(holdoff)
         pb.bool(auto)
@@ -301,6 +314,21 @@ class ADC(gex.Unit):
 
         self._send(cmd=CMD_FORCE_TRIGGER, confirm=confirm)
 
+    def set_active_channels(self, channels, confirm=True):
+        """
+        Set which channels should be active.
+        """
+
+        word = 0
+        for c in channels:
+            word |= 1 << c
+
+        pb = gex.PayloadBuilder()
+        pb.u32(word)
+
+        self._send(cmd=CMD_ENABLE_CHANNELS, pld=pb.close(), confirm=confirm)
+        self.channels = channels
+
     def _parse_buffer(self, buf):
         """
         Convert a raw buffer to a more useful format
@@ -311,7 +339,7 @@ class ADC(gex.Unit):
     def capture_in_progress(self):
         return self._stream_running or self._trig_buf is not None
 
-    def capture(self, count, timeout=30):
+    def capture(self, count, timeout=None):
         """
         Start a block capture.
         This is similar to a forced trigger, but has custom size and doesn't include any pre-trigger.
@@ -321,6 +349,10 @@ class ADC(gex.Unit):
 
         if self.capture_in_progress():
             raise Exception("Another capture already in progress")
+
+        if timeout is None:
+            timeout = 1 + float(count)/self.sample_rate * 2
+            #print("Timeout = %f" % timeout)
 
         pb = gex.PayloadBuilder()
         pb.u32(count)

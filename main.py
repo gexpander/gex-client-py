@@ -1,6 +1,7 @@
 #!/bin/env python3
 import time
 
+import numpy as np
 from matplotlib import pyplot as plt
 
 import gex
@@ -27,31 +28,47 @@ with gex.Client(transport) as client:
     if True:
         adc = gex.ADC(client, 'adc')
 
-        fs = adc.set_sample_rate(1000)
+        adc.set_active_channels([16])
+        fs = adc.set_sample_rate(30000)
 
-        data = None
+        for r in range(0,8):
+            adc.set_sample_time(r)
+            data = adc.capture(1000)
+            print("sr = %d" % r)
+            std = np.std(data)
+            print(std)
 
-        def capture(rpt):
-            global data
-            print("trig'd, %s" % rpt)
-            data = rpt.data
 
-        # adc.setup_trigger(channel=1,
-        #                   level=500,
-        #                   count=100,
-        #                   pretrigger=100,
-        #                   auto=False,
-        #                   edge="rising",
-        #                   holdoff=200,
-        #                   handler=capture)
         #
-        # adc.arm()
-        # time.sleep(2)
+        # global data
+        # data = None
+        #
+        # def capture(rpt):
+        #     global data
+        #     print("trig'd, %s" % rpt)
+        #     data = rpt.data
+        # #
+        # # adc.setup_trigger(channel=1,
+        # #                   level=700,
+        # #                   count=20000,
+        # #                   pretrigger=100,
+        # #                   auto=False,
+        # #                   edge="falling",
+        # #                   holdoff=200,
+        # #                   handler=capture)
+        #
+        # # adc.arm()
+        #
+        # data = adc.capture(1000)
+        #
+        # if data is not None:
+        #     plt.plot(data, 'r.', lw=1)
+        #     plt.show()
+        # else:
+        #     print("Nothing rx")
 
-        data = adc.capture(1000)
-        #plt.hist(data) #, 'r.', lw=1)
-        plt.magnitude_spectrum(data[:,0], Fs=fs, scale='dB', color='C1')
-        plt.show()
+        # plt.magnitude_spectrum(data[:,0], Fs=fs, scale='dB', color='C1')
+        # plt.show()
 
         # def lst(data):
         #     if data is not None:
@@ -60,7 +77,7 @@ with gex.Client(transport) as client:
         #         print("Closed.")
 
         # adc.stream_start(lst)
-        time.sleep(3)
+        # time.sleep(3)
         # adc.stream_stop()
         # print("Done.")
 
