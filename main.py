@@ -10,6 +10,11 @@ transport = gex.TrxRawUSB(sn='0029002F-42365711-32353530')
 #transport = gex.TrxSerialSync(port='/dev/ttyACM0')
 
 with gex.Client(transport) as client:
+    #
+    # if True:
+    #     s = client.ini_read()
+    #     print(s)
+    #     client.ini_write(s)
 
     if False:
         adc = gex.ADC(client, 'adc')
@@ -28,15 +33,24 @@ with gex.Client(transport) as client:
     if True:
         adc = gex.ADC(client, 'adc')
 
-        adc.set_active_channels([16])
-        fs = adc.set_sample_rate(30000)
+        adc.set_active_channels([1])
+        fs = adc.set_sample_rate(1000)
 
-        for r in range(0,8):
-            adc.set_sample_time(r)
-            data = adc.capture(1000)
-            print("sr = %d" % r)
-            std = np.std(data)
-            print(std)
+        data = adc.capture(1000)
+
+        if data is not None:
+            plt.plot(data, 'r-', lw=1)
+            plt.show()
+        else:
+            print("Nothing rx")
+
+
+        # for r in range(0,8):
+        #     adc.set_sample_time(r)
+        #     data = adc.capture(10000)
+        #     print("sr = %d" % r)
+        #     std = np.std(data)
+        #     print(std)
 
 
         #

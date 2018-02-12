@@ -6,7 +6,7 @@ class Neopixel(gex.Unit):
     """
 
     def _type(self):
-        return 'NEOPIXEL'
+        return 'NPX'
 
     def get_len(self):
         """ Get the neopixel strip length """

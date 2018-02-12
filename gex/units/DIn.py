@@ -46,11 +46,19 @@ class DIn(gex.Unit):
     def on_trigger(self, sensitive_pins, callback):
         """
         Assign a trigger callback.
+        Pins are passed as a list of indices (packed), or a bitmap
         Arguments are: pins snapshot, timestamp
         """
-        for i in range(0, 16):
-            if sensitive_pins & (1 << i):
-                self.handlers[i] = callback
+
+        if type(sensitive_pins) == int:
+            L = []
+            for i in range(0,16):
+                if sensitive_pins & (1 << i) != 0:
+                    L.append(i)
+            sensitive_pins = L
+
+        for i in sensitive_pins:
+            self.handlers[i] = callback
 
     def _on_event(self, evt:EventReport):
         if evt.code == 0x00:
