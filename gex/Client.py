@@ -96,6 +96,7 @@ class Client:
 
         self.unit_lu = {}
 
+        callsigns = []
         for n in range(0,count):
             cs = pp.u8()
             name = pp.str()
@@ -106,6 +107,9 @@ class Client:
                 'callsign': cs,
                 'type': type,
             }
+            if cs in callsigns:
+                raise Exception("Duplicate callsign! Wrong GEX config!")
+            callsigns.append(cs)
 
     def ini_read(self) -> str:
         """ Read the settings INI file """

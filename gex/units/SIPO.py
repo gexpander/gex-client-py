@@ -16,12 +16,14 @@ class SIPO(gex.Unit):
     def _type(self):
         return 'SIPO'
 
-    def load(self, buffers, confirm=True):
+    def load(self, buffers, end=0x0000, confirm=True):
         """ Load data - buffers is a list of lists or byte arrays """
         if type(buffers[0]) == int:
             buffers = [buffers]
 
         pb = gex.PayloadBuilder()
+        pb.u16(end)
+
         for b in buffers:
             pb.blob(b)
 
