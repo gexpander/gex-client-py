@@ -18,9 +18,7 @@ with gex.Client(transport) as client:
 
     if True:
         sipo = gex.SIPO(client, 'sipo')
-        while True:
-            sipo.load([[0xFF], [0xAA], [0x11], [0x00]])
-            time.sleep(0.2)
+        sipo.load([[0xA5], [0xFF]])
 
     if False:
         adc = gex.ADC(client, 'adc')

@@ -14,7 +14,7 @@ class EventReport:
 class Client:
     """ GEX client """
 
-    def __init__(self, transport):
+    def __init__(self, transport, load_units=True):
         """
         Set up the client, looking up the GEX USB device using the S/N.
         You may need to configure the udev rule to have direct access.
@@ -55,7 +55,8 @@ class Client:
         self.unit_lu = {}
         self.report_handlers = {}
 
-        self.load_units()
+        if load_units:
+            self.load_units()
 
     def close(self):
         self.transport.close()

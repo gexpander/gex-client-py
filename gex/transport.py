@@ -184,6 +184,7 @@ class TrxRawUSB (BaseGexTransport):
         # Tell the thread to shut down
         self._ending = True
         self._thread.join()
+        usb.util.dispose_resources(self._dev)
 
     def write(self, buffer):
         """ Send a buffer of bytes """
