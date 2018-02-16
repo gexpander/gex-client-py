@@ -16,6 +16,12 @@ with gex.Client(transport) as client:
     #     print(s)
     #     client.ini_write(s)
 
+    if True:
+        sipo = gex.SIPO(client, 'sipo')
+        while True:
+            sipo.load([[0xFF], [0xAA], [0x11], [0x00]])
+            time.sleep(0.2)
+
     if False:
         adc = gex.ADC(client, 'adc')
         print("Enabled channels:", adc.get_channels())
@@ -30,7 +36,7 @@ with gex.Client(transport) as client:
                                                                                raw[17], smooth[17]))
             time.sleep(0.5)
 
-    if True:
+    if False:
         adc = gex.ADC(client, 'adc')
 
         adc.set_active_channels([1])

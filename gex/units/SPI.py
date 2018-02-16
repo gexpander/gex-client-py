@@ -39,12 +39,12 @@ class SPI(gex.Unit):
         """
         self.query(slave, tbytes, rlen=0, rskip=0, confirm=confirm)
 
-    def multicast(self, slaves:int, tbytes, confirm=True):
+    def multicast(self, slaves, tbytes, confirm=True):
         """
         Write with multiple slaves at once.
-        Slaves is a right-aligned bitmap (eg. pins 0,2,3 would be 0b1101)
+        Slaves is a right-aligned bitmap (eg. pins 0,2,3 would be 0b1101), or a list of active positions
         """
         pb = gex.PayloadBuilder()
-        pb.u16(slaves)
+        pb.u16(self.pins2int(slaves))
         pb.blob(tbytes)
         self._send(0x01, pb.close(), confirm=confirm)

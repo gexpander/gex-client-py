@@ -17,6 +17,7 @@ from gex.units.SPI import SPI
 from gex.units.USART import USART
 from gex.units.OneWire import OneWire
 from gex.units.ADC import ADC
+from gex.units.SIPO import SIPO
 
 
 # General, low level

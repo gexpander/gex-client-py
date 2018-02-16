@@ -67,3 +67,24 @@ class Unit:
     def _on_event(self, evt:EventReport):
         """ Stub for an event handler """
         raise NotImplementedError("Missing _on_event() in Unit class \"%s\"" % self.__class__.__name__)
+
+    # --- utils ---
+
+    def pins2int(self, list_or_int):
+        if type(list_or_int) != int:
+            p = 0
+            for pin in list_or_int:
+                p |= 1 << pin
+            return p
+        else:
+            return list_or_int
+
+    def pins2list(self, list_or_int):
+        if type(list_or_int) == int:
+            L = []
+            for i in range(0,32): # this is up to 32 in order to allow using it also for adc channels
+                if list_or_int & (1 << i) != 0:
+                    L.append(i)
+            return L
+        else:
+            return list_or_int

@@ -14,25 +14,25 @@ class DOut(gex.Unit):
         return 'DO'
 
     def write(self, pins:int, confirm=True):
-        """ Set pins to a value """
+        """ Set pins to a value - packed, as int """
         pb = gex.PayloadBuilder()
         pb.u16(pins)
         self._send(0x00, pb.close(), confirm=confirm)
 
-    def set(self, pins:int, confirm=True):
-        """ Set pins high """
+    def set(self, pins, confirm=True):
+        """ Set pins high - packed, int or list """
         pb = gex.PayloadBuilder()
-        pb.u16(pins)
+        pb.u16(self.pins2int(pins))
         self._send(0x01, pb.close(), confirm=confirm)
 
-    def clear(self, pins:int, confirm=True):
-        """ Set pins low """
+    def clear(self, pins, confirm=True):
+        """ Set pins low - packed, int or list """
         pb = gex.PayloadBuilder()
-        pb.u16(pins)
+        pb.u16(self.pins2int(pins))
         self._send(0x02, pb.close(), confirm=confirm)
 
-    def toggle(self, pins:int, confirm=True):
-        """ Toggle pins """
+    def toggle(self, pins, confirm=True):
+        """ Toggle pins - packed, int or list """
         pb = gex.PayloadBuilder()
-        pb.u16(pins)
+        pb.u16(self.pins2int(pins))
         self._send(0x03, pb.close(), confirm=confirm)

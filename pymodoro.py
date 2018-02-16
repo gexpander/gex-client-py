@@ -15,11 +15,12 @@ class Pymodoro:
         self.phase = PH_BREAK_OVER
         self.work_s = 0
         self.break_s = 0
+        self.color = 0x000000
         self.colors = [0x000000 for _ in range(0, LIGHT_CNT)]
 
-        client = gex.Client(gex.TrxRawUSB())
-        self.btn = gex.DIn(client, 'btn')
-        self.neo = gex.Neopixel(client, 'neo')
+        self.client = gex.Client(gex.TrxRawUSB())
+        self.btn = gex.DIn(self.client, 'btn')
+        self.neo = gex.Neopixel(self.client, 'neo')
         self.btn.on_trigger([0], self.on_btn)
 
         self.switch(PH_BREAK_OVER)
@@ -42,50 +43,75 @@ class Pymodoro:
         print("Switch to %s" % phase)
 
         if phase == PH_BREAK:
-            self.colors = [0x009900 for _ in range(0, LIGHT_CNT)]
+            self.color = 0x009900
             self.break_s = BK_TIME * 60
 
         elif phase == PH_BREAK_OVER:
-            self.colors = [0x662200 for _ in range(0, LIGHT_CNT)]
+            self.color = 0x662200
 
         elif phase == PH_WORK:
-            self.colors = [0x990000 for _ in range(0, LIGHT_CNT)]
+            self.color = 0x990000
             self.work_s = WK_TIME * 60
 
         elif phase == PH_WORK_OVER:
-            self.colors = [0x113300 for _ in range(0, LIGHT_CNT)]
+            self.color = 0x113300
 
+        self.colors = [self.color for _ in range(0, LIGHT_CNT)]
         self.phase = phase
 
-    def extinguish(self, dark, total):
+    def show_progress(self, dark, total):
         per_light = total / LIGHT_CNT
-        lights = int((dark + per_light / 2) / per_light)
-        for n in range(0, LIGHT_CNT - lights):
-            self.colors[n] = 0x000000
+        lights = dark / per_light
 
-    def tick(self):
+        lights /= 2
+
+        remainder = float(lights - int(lights))
+        if remainder == 0:
+            remainder = 1
+
+        # print("lights %f, remainder %f" % (lights, remainder))
+        for i in range(0, int(LIGHT_CNT/2)):
+            if i < int((LIGHT_CNT/2)-lights):
+                c = 0x000000
+            elif i == int((LIGHT_CNT/2)-lights):
+                r = (self.color&0xFF0000)>>16
+                g = (self.color&0xFF00)>>8
+                b = self.color&0xFF
+                c = (int(r*remainder))<<16 | (int(g*remainder))<<8 | (int(b*remainder))
+            else:
+                c = self.color
+
+            self.colors[i] = c
+            self.colors[LIGHT_CNT - 1 - i] = c
+
+    def tick(self, elapsed):
         if self.phase == PH_BREAK:
-            self.break_s -= 1
-            print("Break remain: %d s" % self.break_s)
-            self.extinguish(self.break_s, BK_TIME * 60)
+            self.break_s -= elapsed
+            # print("Break remain: %d s" % self.break_s)
+            self.show_progress(self.break_s, BK_TIME * 60)
 
-            if self.break_s == 0:
+            if self.break_s <= 0:
                 self.switch(PH_BREAK_OVER)
 
         elif self.phase == PH_WORK:
-            self.work_s -= 1
-            print("Work remain: %d s" % self.work_s)
-            self.extinguish(self.work_s, WK_TIME * 60)
+            self.work_s -= elapsed
+            # print("Work remain: %d s" % self.work_s)
+            self.show_progress(self.work_s, WK_TIME * 60)
 
-            if self.work_s == 0:
+            if self.work_s <= 0:
                 self.switch(PH_WORK_OVER)
 
         self.display()
 
     def run(self):
-        while True:
-            time.sleep(1)
-            self.tick()
+        step=0.5
+        try:
+            while True:
+                time.sleep(step)
+                self.tick(step)
+        except KeyboardInterrupt:
+            self.client.close()
+            print() # this puts the ^C on its own line
 
 
 a = Pymodoro()

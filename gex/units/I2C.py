@@ -10,7 +10,7 @@ class I2C(gex.Unit):
 
     def _begin_i2c_pld(self, address:int, a10bit:bool=False):
         pb = gex.PayloadBuilder()
-        if a10bit: address |= 0x8000
+        if a10bit: address |= 0x8000 # indication for the Unit driver that it's a 10b address
         pb.u16(address)
         return pb
 

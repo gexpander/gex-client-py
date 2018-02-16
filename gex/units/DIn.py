@@ -23,24 +23,24 @@ class DIn(gex.Unit):
         pp = gex.PayloadParser(msg)
         return pp.u16()
 
-    def arm(self, pins:int, auto:bool=False, confirm:bool=False):
+    def arm(self, pins, auto:bool=False, confirm:bool=False):
         """
         Arm pins for single shot event generation
         pins - array of pin indices to arm
         auto - use auto trigger (auto re-arm after hold-off)
         """
         pb = gex.PayloadBuilder()
-        pb.u16(pins)
+        pb.u16(self.pins2int(pins))
         self._send(0x02 if auto else 0x01, pb.close())
 
-    def disarm(self, pins:int, confirm:bool=False):
+    def disarm(self, pins, confirm:bool=False):
         """
         DisArm pins
         pins - array of pin indices to arm
         """
 
         pb = gex.PayloadBuilder()
-        pb.u16(pins)
+        pb.u16(self.pins2int(pins))
         self._send(0x03, pb.close())
 
     def on_trigger(self, sensitive_pins, callback):
@@ -50,24 +50,17 @@ class DIn(gex.Unit):
         Arguments are: pins snapshot, timestamp
         """
 
-        if type(sensitive_pins) == int:
-            L = []
-            for i in range(0,16):
-                if sensitive_pins & (1 << i) != 0:
-                    L.append(i)
-            sensitive_pins = L
-
-        for i in sensitive_pins:
+        for i in self.pins2list(sensitive_pins):
             self.handlers[i] = callback
 
     def _on_event(self, evt:EventReport):
         if evt.code == 0x00:
             # trigger interrupt
             pp = gex.PayloadParser(evt.payload)
-            triggersource = pp.u16()
+            triggersources = pp.u16() # multiple can happen at once
             snapshot = pp.u16()
 
             for i in range(0,16):
-                if triggersource & (1<<i):
+                if triggersources & (1<<i):
                     if i in self.handlers:
                         self.handlers[i](snapshot, evt.timestamp)

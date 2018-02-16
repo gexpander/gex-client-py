@@ -319,15 +319,11 @@ class ADC(gex.Unit):
         Set which channels should be active.
         """
 
-        word = 0
-        for c in channels:
-            word |= 1 << c
-
         pb = gex.PayloadBuilder()
-        pb.u32(word)
+        pb.u32(self.pins2int(channels))
 
         self._send(cmd=CMD_ENABLE_CHANNELS, pld=pb.close(), confirm=confirm)
-        self.channels = channels
+        self.channels = self.pins2list(channels)
 
     def _parse_buffer(self, buf):
         """
@@ -414,7 +410,10 @@ class ADC(gex.Unit):
         self._query_async(cmd=CMD_STREAM_START, callback=self._on_stream_capt)
 
     def stream_stop(self, delay=0.1, confirm=True):
-        """ Stop a stream """
+        """
+        Stop a stream. Delay is an extra time before removing the listener
+        to let the queued frames to finish being received.
+        """
         if not self._stream_running:
             raise Exception("Not streaming")
 
