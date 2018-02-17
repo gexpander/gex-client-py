@@ -1,3 +1,5 @@
+import threading
+
 import gex
 from gex.Client import EventReport
 
@@ -6,6 +8,13 @@ class USART(gex.Unit):
     """
     USART
     """
+
+    def _init(self):
+        self.handler_decode = None
+        self.handler = None
+        self.buffer = bytearray()
+        self.rxwaitnum = 0
+        self.rxdoneSem = threading.Semaphore()
 
     def _type(self):
         return 'USART'
@@ -42,3 +51,37 @@ class USART(gex.Unit):
                                else evt.payload.decode(self.handler_decode)
 
                 self.handler(data, evt.timestamp)
+            else:
+                self.buffer.extend(evt.payload)
+                if len(self.buffer) >= self.rxwaitnum:
+                    self.rxdoneSem.release()
+
+    def clear_buffer(self):
+        self.buffer = bytearray()
+
+    def receive(self, nbytes, decode='utf-8', timeout=0.1):
+        if self.handler is not None:
+            raise Exception("Can't call .receive() with an async handler registered!")
+        if len(self.buffer) >= nbytes:
+            chunk = self.buffer[0:nbytes]
+            self.buffer = self.buffer[nbytes:] # put the rest back for later...
+            if decode is not None:
+                return chunk.decode(decode)
+            else:
+                return chunk
+
+        self.rxwaitnum = nbytes
+        self.rxdoneSem.acquire() # claim
+
+        # now the event handler releases the sem and we can take it again
+        suc = self.rxdoneSem.acquire(timeout=timeout)
+        # and release it back, to get into a defined state
+        self.rxdoneSem.release()
+
+        if not suc:
+            if len(self.buffer) < nbytes:
+                raise Exception("Data not Rx in timeout!")
+
+        # use the handling code above via recursion
+        return self.receive(nbytes, decode, timeout)
+

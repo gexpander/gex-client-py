@@ -9,7 +9,9 @@ class PayloadParser:
     """
 
     def __init__(self, buf, endian:str='little'):
-        """ buf - buffer to parse (bytearray or binary string) """
+        """
+        buf - buffer to parse (bytearray or binary string)
+        """
 
         if type(buf) == TF_Msg:
             buf = buf.data
@@ -115,5 +117,7 @@ class PayloadParser:
         return self._slice(length)
 
     def skip(self, nbytes:int):
-        """ Skip some bytes """
+        """ Skip some bytes. returns self for chaining. """
         self.blob(nbytes)
+        return self
+
