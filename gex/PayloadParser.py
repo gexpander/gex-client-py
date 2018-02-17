@@ -113,3 +113,7 @@ class PayloadParser:
     def blob(self, length) -> bytearray:
         """ Read a blob of given length """
         return self._slice(length)
+
+    def skip(self, nbytes:int):
+        """ Skip some bytes """
+        self.blob(nbytes)

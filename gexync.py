@@ -1,4 +1,5 @@
 #!/bin/env python3
+
 import gex
 
 import sys
@@ -39,7 +40,7 @@ class GexIniEditor(QtGui.QMainWindow):
         syncAction.triggered.connect(self.gexSync)
 
         icon = self.style().standardIcon(QtGui.QStyle.SP_DialogOkButton)
-        persAction = QtGui.QAction(icon, 'Persist, Close', self)
+        persAction = QtGui.QAction(icon, 'Persist', self)
         persAction.setShortcut('Ctrl+P')
         persAction.triggered.connect(self.gexPersist)
 
@@ -86,6 +87,7 @@ class GexIniEditor(QtGui.QMainWindow):
 
         self.editor.setPlainText(read_ini)
         self.highlight.rehighlight()
+        self.setWindowTitle('GEX config file editor')
 
     def gexSync(self):
         new_txt = self.editor.toPlainText()
@@ -99,12 +101,13 @@ class GexIniEditor(QtGui.QMainWindow):
 
         self.editor.setPlainText(read_ini)
         self.highlight.rehighlight()
+        self.setWindowTitle('*GEX config file editor')
 
     def gexPersist(self):
         client = gex.Client(gex.TrxRawUSB(), load_units=False)
         client.ini_persist()
         client.close()
-        self.close()
+        self.setWindowTitle('GEX config file editor')
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
