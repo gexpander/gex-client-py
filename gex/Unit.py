@@ -36,9 +36,9 @@ class Unit:
         else:
             return self.client.send(cs=self.callsign, cmd=cmd, pld=pld, id=id)
 
-    def _query(self, cmd:int, pld=None, id:int=None) -> TF_Msg:
+    def _query(self, cmd:int, pld=None, id:int=None, timeout=3) -> TF_Msg:
         """ Query the unit. Returns TF_Msg """
-        return self.client.query(cs=self.callsign, cmd=cmd, pld=pld, id=id)
+        return self.client.query(cs=self.callsign, cmd=cmd, pld=pld, id=id, timeout=timeout)
 
     def _query_async(self, cmd:int, callback, pld=None, id:int=None):
         """

@@ -159,7 +159,7 @@ class Client:
         buf.extend(pld)
         return self.tf.query(type=gex.MSG_UNIT_REQUEST, id=id, pld=buf, listener=listener)
 
-    def query(self, cmd:int, cs:int=None, id:int=None, pld=None) -> TF_Msg:
+    def query(self, cmd:int, cs:int=None, id:int=None, pld=None, timeout=3) -> TF_Msg:
         """
         Query a unit. If cs is None, cmd is used as message type
         Returns the message
@@ -174,8 +174,8 @@ class Client:
         self.send(cs=cs, cmd=cmd, id=id, pld=pld, listener=lst)
         # Wait for the response (hope no unrelated frame comes in instead)
 
-        # timeout after 3s
-        self.transport.poll(3, lambda: self._theframe is not None)
+        # timeout
+        self.transport.poll(timeout, lambda: self._theframe is not None)
 
         if self._theframe is None:
             raise Exception("No response to query")
