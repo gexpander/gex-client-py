@@ -20,6 +20,7 @@ from gex.units.ADC import ADC
 from gex.units.SIPO import SIPO
 from gex.units.FCAP import FCAP
 from gex.units.TOUCH import TOUCH
+from gex.units.PWMDim import PWMDim
 
 
 # General, low level
