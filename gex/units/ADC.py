@@ -361,15 +361,16 @@ class ADC(gex.Unit):
         def lst(frame):
             pp = gex.PayloadParser(frame.data)
 
-            index = pp.u8()
-            if index != self._bcap_next_id:
-                self._bcap_done = True
-                raise Exception("Lost capture data frame! Expected %d, got %d" % (self._bcap_next_id, index))
-                #return TF.CLOSE XXX
+            if frame.type == EVT_CAPT_MORE or len(frame.data) != 0:
+                index = pp.u8()
+                if index != self._bcap_next_id:
+                    self._bcap_done = True
+                    raise Exception("Lost capture data frame! Expected %d, got %d" % (self._bcap_next_id, index))
+                    #return TF.CLOSE XXX
 
-            self._bcap_next_id = (self._bcap_next_id + 1) % 256
+                self._bcap_next_id = (self._bcap_next_id + 1) % 256
 
-            buffer.extend(pp.tail())
+                buffer.extend(pp.tail())
 
             if frame.type == EVT_CAPT_DONE:
                 self._bcap_done = True

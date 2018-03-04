@@ -15,9 +15,24 @@ with gex.Client(gex.TrxRawUSB()) as client:
         pp = gex.PayloadParser(data)
         return pp.i16() * 0.0625
 
+    def meas2(addr, addr2):
+        ow.write([0x44], addr=addr)
+        ow.write([0x44], addr=addr2)
+        ow.wait_ready()
+
+        data = ow.query([0xBE], 9, addr=addr)
+        pp = gex.PayloadParser(data)
+        a = pp.i16() * 0.0625
+
+        data = ow.query([0xBE], 9, addr=addr2)
+        pp = gex.PayloadParser(data)
+        b = pp.i16() * 0.0625
+        return a, b
+
     while True:
-        a = meas(6558392391241695016)
-        b = meas(1802309978572980008)
+        (a, b) = meas2(6558392391241695016, 1802309978572980008)
+        # a = meas(6558392391241695016)
+        # b = meas(1802309978572980008)
         print("in: %.2f °C, out: %f °C" % (a, b))
 
 

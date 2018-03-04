@@ -4,6 +4,8 @@ __javascript__/
 *.py[cod]
 *$py.class
 
+
+*.wav
 .idea/
 
 # C extensions
