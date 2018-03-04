@@ -150,6 +150,7 @@ class TrxRawUSB (BaseGexTransport):
 
         detach_kernel_driver(dev, 2)  # CDC data
         detach_kernel_driver(dev, 3)  # CDC control
+        detach_kernel_driver(dev, 4)  # CDC data2
 
         # Set default configuration
         # (this will fail if we don't have the right permissions)
@@ -188,7 +189,7 @@ class TrxRawUSB (BaseGexTransport):
 
     def write(self, buffer):
         """ Send a buffer of bytes """
-        self._dev.write(0x02, buffer, 100)
+        self._dev.write(0x04, buffer, 100)
 
     def poll(self, timeout, testfunc=None):
         # Using time.sleep() would block for too long. Instead we release the semaphore on each Rx chunk of data

@@ -48,7 +48,8 @@ class Client:
                 pld_as_s = msg.data.decode('utf-8')
             except UnicodeDecodeError:
                 pld_as_s = str(msg.data)
-            raise Exception("UNHANDLED MESSAGE! %s" % pld_as_s)
+            # raise Exception("UNHANDLED MESSAGE! %s, type %d, id %04x" % (' '.join([("%02x"%b) for b in msg.data]), msg.type, msg.id))
+            print("UNHANDLED MESSAGE! %s, type %d, id %04x" % (' '.join([("%02x" % b) for b in msg.data]), msg.type, msg.id))
 
         self.tf.add_fallback_listener(fallback_lst)
 

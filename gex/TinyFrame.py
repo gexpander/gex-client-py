@@ -142,6 +142,8 @@ class TinyFrame:
         if listener is not None:
             self.add_id_listener(id, listener)
 
+        print("Tx: " + ' '.join(["%02x"%b for b in buf]))
+        print("    " + ''.join(["%c"% (b if b>=32 and b<127 else ord('.')) for b in buf]))
         self.write(buf)
         return id
 
@@ -187,6 +189,9 @@ class TinyFrame:
         """
         Parse bytes received on the serial port
         """
+        print("Rx: " + ' '.join(["%02x"%b for b in bytes]))
+        print("    " + ''.join(["%c"% (b if b>=32 and b<127 else ord('.')) for b in bytes]))
+
         for b in bytes:
             self.accept_byte(b)
 
@@ -233,6 +238,7 @@ class TinyFrame:
 
             if len(self.rbuf) == self.rlen:
                 self.rf.len = self._unpack(self.rbuf)
+                print("Len=%d"%self.rf.len)
 
                 self.ps = 'TYPE'
                 self.rlen = self.TYPE_BYTES

@@ -11,10 +11,10 @@ with gex.Client(gex.TrxRawUSB()) as client:
     adc = gex.ADC(client, 'a')
 
     adc.set_active_channels([3])
-    rate=44000
+    rate=20000
     fs = adc.set_sample_rate(rate)
 
-    count = 44000*2
+    count = 1000
     data = np.add(adc.capture(count) / 4096, -0.5)
 
     if data is not None:
