@@ -301,7 +301,8 @@ class TinyFrame:
                 actual = self._cksum(self.rpayload)
 
                 if pck != actual:
-                    print("[TF] Payload checksum mismatch")
+                    print("[TF] Payload checksum mismatch (given %x, computed %x)" % (pck, actual))
+                    print(self.rpayload)
                     self.reset_parser()
                 else:
                     self.handle_rx_frame()

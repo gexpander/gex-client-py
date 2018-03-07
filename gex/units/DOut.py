@@ -1,5 +1,11 @@
 import gex
 
+CMD_WRITE = 0
+CMD_SET = 1
+CMD_CLEAR = 2
+CMD_TOGGLE = 3
+CMD_PULSE = 4
+
 class DOut(gex.Unit):
     """
     Digital output port.
@@ -17,22 +23,45 @@ class DOut(gex.Unit):
         """ Set pins to a value - packed, as int """
         pb = gex.PayloadBuilder()
         pb.u16(pins)
-        self._send(0x00, pb.close(), confirm=confirm)
+        self._send(CMD_WRITE, pb.close(), confirm=confirm)
 
     def set(self, pins, confirm=True):
         """ Set pins high - packed, int or list """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
-        self._send(0x01, pb.close(), confirm=confirm)
+        self._send(CMD_SET, pb.close(), confirm=confirm)
 
     def clear(self, pins, confirm=True):
         """ Set pins low - packed, int or list """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
-        self._send(0x02, pb.close(), confirm=confirm)
+        self._send(CMD_CLEAR, pb.close(), confirm=confirm)
 
     def toggle(self, pins, confirm=True):
         """ Toggle pins - packed, int or list """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
-        self._send(0x03, pb.close(), confirm=confirm)
+        self._send(CMD_TOGGLE, pb.close(), confirm=confirm)
+
+    def pulse_ms(self, pins, length, active=True, confirm=True):
+        """ Send a pulse with length 1-65535 ms on selected pins """
+        pb = gex.PayloadBuilder()
+        pb.u16(self.pins2int(pins))
+        pb.bool(active)
+        pb.bool(False)
+        pb.u16(length)
+        self._send(CMD_PULSE, pb.close(), confirm=confirm)
+
+    def pulse_us(self, pins, length, active=True, confirm=True):
+        """ Send a pulse of 1-999 us on selected pins """
+        pb = gex.PayloadBuilder()
+        pb.u16(self.pins2int(pins))
+        pb.bool(active)
+        pb.bool(True)
+        pb.u16(length)
+        self._send(CMD_PULSE, pb.close(), confirm=confirm)
+
+
+
+
+
