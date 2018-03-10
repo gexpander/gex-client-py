@@ -21,6 +21,7 @@ from gex.units.SIPO import SIPO
 from gex.units.FCAP import FCAP
 from gex.units.TOUCH import TOUCH
 from gex.units.PWMDim import PWMDim
+from gex.units.DAC import DAC
 
 
 # General, low level
