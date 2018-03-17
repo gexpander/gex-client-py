@@ -14,6 +14,8 @@ class SPI(gex.Unit):
 
         If rskip is -1 (default), the tbytes length will be used.
         Set it to 0 to skip nothing.
+
+        slave is 0-based index
         """
         if rskip == -1:
             rskip = len(tbytes)
@@ -24,7 +26,7 @@ class SPI(gex.Unit):
         pb.u16(rlen)
         pb.blob(tbytes)
 
-        # SPI does not respond if rlen is 0, but can be envorced using 'confirm'
+        # SPI does not respond if rlen is 0, but can be enforced using 'confirm'
         if rlen > 0:
             resp = self._query(0x00, pb.close())
             return resp.data

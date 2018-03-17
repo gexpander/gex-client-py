@@ -43,22 +43,22 @@ class DOut(gex.Unit):
         pb.u16(self.pins2int(pins))
         self._send(CMD_TOGGLE, pb.close(), confirm=confirm)
 
-    def pulse_ms(self, pins, length, active=True, confirm=True):
+    def pulse_ms(self, ms, pins=0b01, active=True, confirm=True):
         """ Send a pulse with length 1-65535 ms on selected pins """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
         pb.bool(active)
         pb.bool(False)
-        pb.u16(length)
+        pb.u16(ms)
         self._send(CMD_PULSE, pb.close(), confirm=confirm)
 
-    def pulse_us(self, pins, length, active=True, confirm=True):
+    def pulse_us(self, us, pins=1, active=True, confirm=True):
         """ Send a pulse of 1-999 us on selected pins """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
         pb.bool(active)
         pb.bool(True)
-        pb.u16(length)
+        pb.u16(us)
         self._send(CMD_PULSE, pb.close(), confirm=confirm)
 
 
