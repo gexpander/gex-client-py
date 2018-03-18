@@ -1,0 +1,78 @@
+## UNITS.INI
+## GEX v0.0.1 on STM32F072-HUB
+## built Mar 17 2018 at 17:53:15
+
+[UNITS]
+# Create units by adding their names next to a type (e.g. DO=A,B),
+# remove the same way. Reload to update the unit sections below.
+
+# Digital output
+DO=rst1,rst2
+# Digital input with triggers
+DI=
+# Neopixel RGB LED strip
+NPX=
+# I2C master
+I2C=
+# SPI master
+SPI=spi
+# Serial port
+USART=
+# 1-Wire master
+1WIRE=
+# Analog/digital converter
+ADC=
+# Shift register driver (595, 4094)
+SIPO=
+# Frequency and pulse measurement
+FCAP=
+# Capacitive touch sensing
+TOUCH=
+# Simple PWM output
+PWMDIM=
+# Two-channel analog output with waveforms
+DAC=
+
+[DO:rst1@2]
+# Port name
+port=B
+# Pins (comma separated, supports ranges)
+pins=2
+# Initially high pins
+initial=2
+# Open-drain pins
+open-drain=
+
+[DO:rst2@3]
+# Port name
+port=B
+# Pins (comma separated, supports ranges)
+pins=6
+# Initially high pins
+initial=6
+# Open-drain pins
+open-drain=
+
+[SPI:spi@1]
+# Peripheral number (SPIx)
+device=1
+# Pin mappings (SCK,MISO,MOSI)
+#  SPI1: (0) A5,A6,A7     (1) B3,B4,B5
+#  SPI2: (0) B13,B14,B15
+remap=1
+
+# Prescaller: 2,4,8,...,256
+prescaller=64
+# Clock polarity: 0,1 (clock idle level)
+cpol=0
+# Clock phase: 0,1 (active edge, 0-first, 1-second)
+cpha=0
+# Transmit only, disable MISO
+tx-only=N
+# Bit order (LSB or MSB first)
+first-bit=MSB
+
+# SS port name
+port=B
+# SS pins (comma separated, supports ranges)
+pins=1-0

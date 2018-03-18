@@ -25,19 +25,19 @@ class DOut(gex.Unit):
         pb.u16(pins)
         self._send(CMD_WRITE, pb.close(), confirm=confirm)
 
-    def set(self, pins, confirm=True):
+    def set(self, pins=1, confirm=True):
         """ Set pins high - packed, int or list """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
         self._send(CMD_SET, pb.close(), confirm=confirm)
 
-    def clear(self, pins, confirm=True):
+    def clear(self, pins=1, confirm=True):
         """ Set pins low - packed, int or list """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
         self._send(CMD_CLEAR, pb.close(), confirm=confirm)
 
-    def toggle(self, pins, confirm=True):
+    def toggle(self, pins=1, confirm=True):
         """ Toggle pins - packed, int or list """
         pb = gex.PayloadBuilder()
         pb.u16(self.pins2int(pins))
