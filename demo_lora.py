@@ -4,7 +4,7 @@ import gex
 import sx_fsk as sx
 
 
-# we're demonstrating the use of the QFSK mode of the SX1278
+# we're demonstrating the use of the GFSK mode of the SX1278
 # this is an example of how GEX can be used to control a peripheral module - in this case evaluating
 #  it for use in GEX remote
 
