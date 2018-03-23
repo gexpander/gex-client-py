@@ -43,13 +43,14 @@ class TrxSerialSync (BaseGexTransport):
     Transport based on pySerial, no async support.
     Call poll() to receive spontaneous events or responses.
 
-    This can be used only if EXPOSE_ACM is enabled
+    This can be used only if EXPOSE_ACM is enabled, or when GEX is connected
+    using a USB-serial adaptor
     """
 
-    def __init__(self, port='/dev/ttyACM0'):
+    def __init__(self, port='/dev/ttyACM0', baud=115200, timeout=0.3):
         """ port - device to open """
         super().__init__()
-        self._serial = serial.Serial(port=port, timeout=0.3)
+        self._serial = serial.Serial(port=port, baudrate=baud, timeout=timeout)
 
     def close(self):
         # Tell the thread to shut down
@@ -89,6 +90,68 @@ class TrxSerialSync (BaseGexTransport):
             else:
                 if self._listener:
                     self._listener(rv)
+
+
+class TrxSerialThread (BaseGexTransport):
+    """
+    Transport based on pySerial, running on a thread.
+
+    This can be used only if EXPOSE_ACM is enabled, or when GEX is connected
+    using a USB-serial adaptor
+    """
+
+    def __init__(self, port='/dev/ttyACM0', baud=115200, timeout=0.2):
+        """ port - device to open """
+        super().__init__()
+        self._serial = serial.Serial(port=port, baudrate=baud, timeout=timeout)
+
+        self.dataSem = threading.Semaphore()
+        self.dataSem.acquire()
+
+        # ----------------------- RX THREAD ---------------------------
+
+        # The reception is done using a thread.
+        # It ends when _ending is set True
+        self._ending = False
+
+        def worker():
+            while not self._ending:
+                try:
+                    resp = self._serial.read(max(1, self._serial.in_waiting))
+                    if len(resp) and self._listener is not None:
+                        self._listener(bytearray(resp))
+                        self.dataSem.release()  # notify we have data
+                except usb.USBError:
+                    pass  # timeout
+
+        t = threading.Thread(target=worker)
+        t.start()
+
+        # Save a reference for calling join() later
+        self._thread = t
+
+    def close(self):
+        # Tell the thread to shut down
+        self._ending = True
+        self._thread.join()
+        self._serial.close()
+
+    def write(self, buffer):
+        """ Send a buffer of bytes """
+        self._serial.write(buffer)
+
+    def poll(self, timeout, testfunc=None):
+        """
+        Receive bytes until a timeout, testfunc returns True,
+        or first data if no testfunc is given
+        """
+
+        start = time.time()
+        while (time.time() - start) < timeout:
+            self.dataSem.acquire(True, 0.1)
+            if testfunc is None or testfunc():
+                break
+        pass
 
 
 class TrxRawUSB (BaseGexTransport):

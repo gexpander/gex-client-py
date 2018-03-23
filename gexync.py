@@ -23,7 +23,9 @@ class GexIniEditor(QtGui.QMainWindow):
     and reopen the editor.
     """
 
-    def __init__(self):
+    def __init__(self, xferLambda):
+        self.xferLambda = xferLambda
+
         super().__init__()
         self.initUI()
         # TODO let user pick GEX device if multiple
@@ -81,7 +83,7 @@ class GexIniEditor(QtGui.QMainWindow):
         self.editor.setPlainText("")
         self.editor.repaint()
 
-        client = gex.Client(gex.TrxRawUSB(), load_units=False)
+        client = gex.Client(self.xferLambda(), load_units=False)
         read_ini = client.ini_read()
         client.close()
 
@@ -94,7 +96,7 @@ class GexIniEditor(QtGui.QMainWindow):
         self.editor.setPlainText("")
         self.editor.repaint()
 
-        client = gex.Client(gex.TrxRawUSB(), load_units=False)
+        client = gex.Client(self.xferLambda(), load_units=False)
         client.ini_write(new_txt)
         read_ini = client.ini_read()
         client.close()
@@ -104,14 +106,16 @@ class GexIniEditor(QtGui.QMainWindow):
         self.setWindowTitle('*GEX config file editor')
 
     def gexPersist(self):
-        client = gex.Client(gex.TrxRawUSB(), load_units=False)
+        client = gex.Client(self.xferLambda(), load_units=False)
         client.ini_persist()
         client.close()
         self.setWindowTitle('GEX config file editor')
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    editor = GexIniEditor()
+    # editor = GexIniEditor(lambda: gex.TrxRawUSB())
+    editor = GexIniEditor(lambda: gex.TrxSerialThread(port='/dev/ttyUSB1',
+                                                      baud=57600))
 
     # centered resize
     w = 800

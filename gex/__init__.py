@@ -7,6 +7,7 @@ from gex.Unit import Unit
 from gex.Client import Client
 from gex.transport import TrxRawUSB
 from gex.transport import TrxSerialSync
+from gex.transport import TrxSerialThread
 
 # import all the units
 from gex.units.DOut import DOut
