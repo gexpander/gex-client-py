@@ -113,9 +113,9 @@ class GexIniEditor(QtGui.QMainWindow):
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    # editor = GexIniEditor(lambda: gex.TrxRawUSB())
-    editor = GexIniEditor(lambda: gex.TrxSerialThread(port='/dev/ttyUSB1',
-                                                      baud=57600))
+    editor = GexIniEditor(lambda: gex.TrxRawUSB())
+    # editor = GexIniEditor(lambda: gex.TrxSerialThread(port='/dev/ttyUSB1',
+    #                                                   baud=57600))
 
     # centered resize
     w = 800

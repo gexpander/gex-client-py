@@ -166,7 +166,7 @@ class TrxRawUSB (BaseGexTransport):
         self.dataSem = threading.Semaphore()
         self.dataSem.acquire()
 
-        GEX_ID = (0x0483, 0x572a)
+        GEX_ID = (0x1209, 0x4c60)
 
         # -------------------- FIND THE DEVICE ------------------------
 
