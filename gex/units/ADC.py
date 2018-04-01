@@ -10,6 +10,7 @@ import numpy as np
 
 CMD_READ_RAW = 0
 CMD_READ_SMOOTHED = 1
+CMD_READ_CAL_CONSTANTS = 2
 CMD_GET_ENABLED_CHANNELS = 10
 CMD_GET_SAMPLE_RATE = 11
 
@@ -39,6 +40,24 @@ class TriggerReport:
 
     def __str__(self):
         return "EventReport(edge %d, pretrig len %d, ts %d, data %s)" % (self.edge, self.pretrig, self.timestamp, self.data)
+
+class ADC_CalData:
+    def __init__(self, pp:gex.PayloadParser):
+        self.VREFINT_CAL = pp.u16() # ADC raw value for VREFINT, 30C ambient
+        self.VREFINT_CAL_VADCREF = pp.u16() # Analog reference voltage during VREFINT calibration (mV) +-10mV
+
+        self.TSENSE_CAL1 = pp.u16() # ADC raw value in point 1
+        self.TSENSE_CAL2 = pp.u16() # ADC raw value in point 2
+        self.TSENSE_CAL1_TEMP = pp.u8() # Temperature for point 1 (Celsius) +-5C
+        self.TSENSE_CAL2_TEMP = pp.u8() # Temperature for point 2 (Celsius) +-5C
+        self.TSENSE_CAL_VADCREF = pp.u16() # Analog reference voltage during TSENSE calibration (mV) +-10mV
+
+    def __str__(self):
+        return "ADC_CalData(VREFINT=%d at Vref=%d mV, TSENSE_%dC=%d, TSENSE_%dC=%d at Vref=%d mV)" % \
+               (self.VREFINT_CAL, self.VREFINT_CAL_VADCREF,
+                self.TSENSE_CAL1_TEMP, self.TSENSE_CAL1, self.TSENSE_CAL2_TEMP, self.TSENSE_CAL2, self.TSENSE_CAL_VADCREF)
+
+    # TODO utility for converting raw values to real voltage / temperature
 
 class ADC(gex.Unit):
     """
@@ -160,6 +179,13 @@ class ADC(gex.Unit):
         """
         msg = self._query(CMD_GET_ENABLED_CHANNELS)
         return list(msg.data)
+
+    def get_calibration_data(self):
+        """
+        Read ADC calibration data
+        """
+        msg = self._query(CMD_READ_CAL_CONSTANTS)
+        return ADC_CalData(gex.PayloadParser(msg.data))
 
     def set_sample_rate(self, freq:int):
         """ Set sample rate in Hz. Returns the real achieved frequency as float. """

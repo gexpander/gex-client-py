@@ -8,9 +8,12 @@ from matplotlib import pyplot as plt
 from scipy.io import wavfile
 
 with gex.Client(gex.TrxRawUSB()) as client:
-    adc = gex.ADC(client, 'a')
+    adc = gex.ADC(client, 'adc')
 
-    adc.set_active_channels([3])
+    print(adc.get_calibration_data())
+    print(adc.get_channels())
+
+    adc.set_active_channels([1])
     rate=500
     fs = adc.set_sample_rate(rate)
 
