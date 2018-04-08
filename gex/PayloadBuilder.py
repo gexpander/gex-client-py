@@ -71,3 +71,8 @@ class PayloadBuilder:
     def blob(self, blob):
         """ Ad an arbitrary blob (bytearray or binary string) """
         self.buf.extend(blob)
+
+    def zeros(self, count):
+        for i in range(0,count):
+            self.buf.append(0)
+

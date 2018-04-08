@@ -26,6 +26,8 @@ class GexIniEditor(QtGui.QMainWindow):
     def __init__(self, xferLambda):
         self.xferLambda = xferLambda
 
+        self.filenum = int(sys.argv[1]) if len(sys.argv)>1 else 0
+
         super().__init__()
         self.initUI()
         # TODO let user pick GEX device if multiple
@@ -84,7 +86,7 @@ class GexIniEditor(QtGui.QMainWindow):
         self.editor.repaint()
 
         client = gex.Client(self.xferLambda(), load_units=False)
-        read_ini = client.ini_read()
+        read_ini = client.ini_read(self.filenum)
         client.close()
 
         self.editor.setPlainText(read_ini)
@@ -98,7 +100,7 @@ class GexIniEditor(QtGui.QMainWindow):
 
         client = gex.Client(self.xferLambda(), load_units=False)
         client.ini_write(new_txt)
-        read_ini = client.ini_read()
+        read_ini = client.ini_read(self.filenum)
         client.close()
 
         self.editor.setPlainText(read_ini)

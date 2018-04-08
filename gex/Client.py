@@ -111,9 +111,14 @@ class Client:
                 raise Exception("Duplicate callsign! Wrong GEX config!")
             callsigns.append(cs)
 
-    def ini_read(self) -> str:
-        """ Read the settings INI file """
-        buffer = self.bulk_read(cs=None, cmd=gex.MSG_INI_READ)
+    def ini_read(self, filenum=0) -> str:
+        """
+        Read the settings INI file
+        filenum - 0: UNITS.INI, 1: SYSTEM.INI
+        When writing, the file name is detected from the content automatically.
+        """
+        pld = bytearray([filenum])
+        buffer = self.bulk_read(cs=None, pld=pld, cmd=gex.MSG_INI_READ)
         return buffer.decode('utf-8')
 
     def ini_write(self, buffer):

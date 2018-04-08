@@ -3,6 +3,10 @@ import time
 import serial
 import usb.core
 import threading
+import gex
+
+
+
 
 class BaseGexTransport:
     """ Base class for GEX transports """
@@ -36,6 +40,130 @@ class BaseGexTransport:
         or first data if no testfunc is given
         """
         raise Exception("Not implemented")
+
+
+class DongleAdapter(BaseGexTransport):
+    def __init__(self, transport, slave):
+        # TODO change to allow multiple clients binding to the same adapter
+        super().__init__()
+        self._transport = transport
+        self._slaveAddr = slave
+        self._address = None
+        transport.listen(self._handleRx)
+
+        self.gw_reset()
+        self.gw_add_nodes([slave])
+
+        print('Gateway network ID: ' +
+              '.'.join(['%02X' % x for x in self.gw_get_net_id()]))
+
+    def _handleRx(self, frame):
+        if len(frame) != 64:
+            raise Exception("Frame len not 64")
+
+        pp = gex.PayloadParser(frame)
+        frame_type = pp.u8()
+
+        if frame_type == 1:
+            # network address report
+            self._address = list(pp.blob(4))
+        elif frame_type == 2:
+            slave_addr = pp.u8()
+            pld_len = pp.u8()
+            pld = pp.blob(pld_len)
+
+            # print("Rx chunk(%d): %s" % (pld_len, pld))
+
+            if slave_addr == self._slaveAddr:
+                if self._listener is not None:
+                    self._listener(pld)
+
+    def close(self):
+        self._transport.close()
+
+    def write(self, buffer):
+        # multipart sending
+        pb = gex.PayloadBuilder()
+        pb.u8(0x47)
+        pb.u8(0xB8)
+        pb.u8(ord('m'))
+        pb.u8(self._slaveAddr)
+        pb.u16(len(buffer))
+
+        ck = 0
+        for c in buffer:
+            ck ^= c
+        ck = 0xFF & ~ck
+
+        pb.u8(ck)
+
+        start = 0
+        spaceused = len(pb.buf)
+        fits = min(64-spaceused, len(buffer))
+        pb.blob(buffer[start:fits])
+        if (spaceused + fits) < 64:
+            pb.zeros(64 - (spaceused + fits))
+        start += fits
+
+        buf = pb.close()
+        self._transport.write(buf)
+
+        while start < len(buffer):
+            pb = gex.PayloadBuilder()
+            fits = min(64, len(buffer) - start)
+            pb.blob(buffer[start:start+fits])
+            start += fits
+
+            if fits < 64:
+                pb.zeros(64 - fits)
+
+            buf = pb.close()
+            self._transport.write(buf)
+
+    def listen(self, listener):
+        self._listener = listener
+
+    def poll(self, timeout, testfunc=None):
+        self._transport.poll(timeout, testfunc)
+
+    def gw_reset(self):
+        pb = gex.PayloadBuilder()
+        pb.u8(0x47)
+        pb.u8(0xB8)
+        pb.u8(ord('r'))
+        spaceused = len(pb.buf)
+        pb.zeros(64 - spaceused)
+        self._transport.write(pb.close())
+
+    def gw_add_nodes(self, nodes):
+        pb = gex.PayloadBuilder()
+        pb.u8(0x47)
+        pb.u8(0xB8)
+        pb.u8(ord('n'))
+        pb.u8(len(nodes))
+
+        for n in nodes:
+            pb.u8(n)
+
+        spaceused = len(pb.buf)
+        pb.zeros(64 - spaceused)
+        self._transport.write(pb.close())
+
+    def gw_get_net_id(self):
+        if self._address is not None:
+            # lazy load
+            return self._address
+
+        pb = gex.PayloadBuilder()
+        pb.u8(0x47)
+        pb.u8(0xB8)
+        pb.u8(ord('i'))
+        spaceused = len(pb.buf)
+        pb.zeros(64 - spaceused)
+        self._transport.write(pb.close())
+
+        self.poll(0.5, lambda: self._address is not None)
+        return self._address
 
 
 class TrxSerialSync (BaseGexTransport):
@@ -151,7 +279,6 @@ class TrxSerialThread (BaseGexTransport):
             self.dataSem.acquire(True, 0.1)
             if testfunc is None or testfunc():
                 break
-        pass
 
 
 class TrxRawUSB (BaseGexTransport):
@@ -159,14 +286,18 @@ class TrxRawUSB (BaseGexTransport):
     pyUSB-based transport with minimal overhead and async IO
     """
 
-    def __init__(self, sn=None):
+    def __init__(self, sn=None, remote=False):
         """ sn - GEX serial number """
         super().__init__()
 
         self.dataSem = threading.Semaphore()
         self.dataSem.acquire()
 
-        GEX_ID = (0x1209, 0x4c60)
+        GEX_ID = (0x1209, 0x4c61 if remote else 0x4c60)
+
+        self.EP_IN = 0x81 if remote else 0x82
+        self.EP_OUT = 0x01 if remote else 0x02
+        self.EP_CMD = 0x82 if remote else 0x83
 
         # -------------------- FIND THE DEVICE ------------------------
 
@@ -200,7 +331,7 @@ class TrxRawUSB (BaseGexTransport):
         # Here we tear that down and expose the raw endpoints
 
         def detach_kernel_driver(dev, iface):
-            if dev.is_kernel_driver_active(1):
+            if dev.is_kernel_driver_active(1):#fixme iface is not used??
                 try:
                     dev.detach_kernel_driver(1)
                 except usb.core.USBError as e:
@@ -211,8 +342,8 @@ class TrxRawUSB (BaseGexTransport):
         # EP2 - CDC data in/out
         # EP3 - CDC control
 
-        detach_kernel_driver(dev, 2)  # CDC data
-        detach_kernel_driver(dev, 3)  # CDC control
+        detach_kernel_driver(dev, self.EP_IN&0x7F)  # CDC data
+        detach_kernel_driver(dev, self.EP_CMD&0x7F)  # CDC control
 
         # Set default configuration
         # (this will fail if we don't have the right permissions)
@@ -230,7 +361,7 @@ class TrxRawUSB (BaseGexTransport):
         def worker():
             while not self._ending:
                 try:
-                    resp = self._dev.read(0x82, 64, 100)
+                    resp = self._dev.read(self.EP_IN, 64, 100)
                     if self._listener is not None:
                         self._listener(bytearray(resp))
                         self.dataSem.release() # notify we have data
@@ -251,7 +382,7 @@ class TrxRawUSB (BaseGexTransport):
 
     def write(self, buffer):
         """ Send a buffer of bytes """
-        self._dev.write(0x02, buffer, 100)
+        self._dev.write(self.EP_OUT, buffer, 100)
 
     def poll(self, timeout, testfunc=None):
         # Using time.sleep() would block for too long. Instead we release the semaphore on each Rx chunk of data
