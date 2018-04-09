@@ -54,8 +54,8 @@ class DongleAdapter(BaseGexTransport):
         self.gw_reset()
         self.gw_add_nodes([slave])
 
-        print('Gateway network ID: ' +
-              '.'.join(['%02X' % x for x in self.gw_get_net_id()]))
+        print('Dongle network prefix: ' +
+              ':'.join(['%02X' % x for x in self.gw_get_net_id()]))
 
     def _handleRx(self, frame):
         if len(frame) != 64:
