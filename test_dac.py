@@ -24,11 +24,14 @@ with gex.Client(gex.TrxRawUSB()) as client:
     # #
     # dac.sync()
 
-    for i in range(0, 1000):
-        dac.set_frequency(1, i)
-        time.sleep(0.001)
+    # for i in range(0, 1000):
+    #     dac.set_frequency(1, i)
+    #     time.sleep(0.001)
 
-
+    dac.waveform(1, 'SIN')
+    dac.set_frequency(1, 1000)
+    time.sleep(2)
+    dac.dc(1, 2047)
 
     # dac.waveform(1, 'SIN')
     # # dac.set_frequency(1, 1000)
