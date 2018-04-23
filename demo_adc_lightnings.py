@@ -12,6 +12,8 @@ from scipy.io import wavfile
 #                          |
 #                          '-> 10k -> GND
 
+led = None
+
 def capture(tr):
     now=datetime.datetime.now()
     now.isoformat()
@@ -19,16 +21,20 @@ def capture(tr):
     print("Capture! ")
     print(data)
     np.save("lightning-%s"%now.isoformat(), data)
+    led.pulse_ms(250, confirm=False)
 
 with gex.Client(gex.TrxRawUSB()) as client:
     adc = gex.ADC(client, 'adc')
+    led = gex.DOut(client, 'led')
+
+    adc.set_sample_rate(60000)
 
     adc.on_trigger(capture)
     adc.setup_trigger(1,
-                      level=500,
-                      count=1000,
+                      level=2600,
+                      count=5000,
                       edge='rising',
-                      pretrigger=250,
+                      pretrigger=500,
                       holdoff=500,
                       auto=True)
 
