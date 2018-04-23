@@ -10,6 +10,8 @@ from scipy.io import wavfile
 with gex.Client(gex.TrxRawUSB()) as client:
     adc = gex.ADC(client, 'adc')
 
-    for i in range(1000):
-        print(adc.read_raw())
+    print(adc.capture(100))
+
+    # for i in range(1000):
+    #     print(adc.read_raw())
 

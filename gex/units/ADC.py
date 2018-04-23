@@ -273,9 +273,9 @@ class ADC(gex.Unit):
         """
 
         nedge = 0
-        if edge == 'rising':
+        if edge == 'rising' or edge == 'up':
             nedge = 1
-        elif edge == 'falling':
+        elif edge == 'falling' or edge == 'down':
             nedge = 2
         elif edge == 'both':
             nedge = 3
