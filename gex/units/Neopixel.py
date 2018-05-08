@@ -10,7 +10,7 @@ class Neopixel(gex.Unit):
 
     def get_len(self):
         """ Get the neopixel strip length """
-        resp = self._query(0x04)
+        resp = self._query(10)
         pp = gex.PayloadParser(resp)
         return pp.u16()
 
@@ -24,10 +24,10 @@ class Neopixel(gex.Unit):
         pb = gex.PayloadBuilder(endian='big' if reverse else 'little')
         for c in colors:
             pb.u24(c)
-        self._send(0x01, pb.close(), confirm=confirm)
+        self._send(1, pb.close(), confirm=confirm)
 
     def clear(self, confirm=True):
         """
         Reset the strip (set all to black)
         """
-        self._send(0x00, confirm=confirm)
+        self._send(0, confirm=confirm)

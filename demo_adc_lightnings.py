@@ -21,7 +21,7 @@ def capture(tr):
     print("Capture! ")
     print(data)
     np.save("lightning-%s"%now.isoformat(), data)
-    led.pulse_ms(250, confirm=False)
+    led.pulse_ms(1000, confirm=False)
 
 with gex.Client(gex.TrxRawUSB()) as client:
     adc = gex.ADC(client, 'adc')
