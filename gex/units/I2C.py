@@ -47,26 +47,56 @@ class I2C(gex.Unit):
 
         fields = []
         pp = gex.PayloadParser(resp.data, endian=endian)
-        for i in range(0, count):
-            if width==1: fields.append(pp.u8())
-            elif width==2: fields.append(pp.u16())
-            elif width==3: fields.append(pp.u24())
-            elif width==4: fields.append(pp.u32())
-            else: raise Exception("Bad width")
+        if width==1:
+            for i in range(0, count):
+                fields.append(pp.u8())
+        elif width==2:
+            for i in range(0, count):
+                fields.append(pp.u16())
+        elif width==3:
+            for i in range(0, count):
+                fields.append(pp.u24())
+        elif width==4:
+            for i in range(0, count):
+                fields.append(pp.u32())
+        else:
+            raise Exception("Bad width")
+
         return fields
 
-    def write_reg(self, address:int, reg, value:int, width:int=1, a10bit:bool=False, endian='little', confirm=True):
+    def write_reg(self, address:int, reg, value, width:int=1, a10bit:bool=False, endian='little', confirm=True):
         """
-        Write a to a single register
+        Write a to a single register.
+        value can be int or array (in which case `width` applies to each item)
         """
         pb = self._begin_i2c_pld(address, a10bit)
         pb.u8(reg)
 
         pb.endian = endian
-        if width == 1: pb.u8(value)
-        elif width == 2: pb.u16(value)
-        elif width == 3: pb.u24(value)
-        elif width == 4: pb.u32(value)
-        else: raise Exception("Bad width")
+        arr = value
+        if type(arr) is int:
+            arr = [value]
+
+        if width == 1:
+            pb.blob(arr)
+        elif width == 2:
+            for v in arr:
+                pb.u16(v)
+        elif width == 3:
+            for v in arr:
+                pb.u24(v)
+        elif width == 4:
+            for v in arr:
+                pb.u32(v)
+        else:
+            raise Exception("Bad width")
 
         self._send(0x02, pb.close(), confirm=confirm)
+
+    def write_byte_data(self, address, reg, value):
+        """ Compatibility alias for python3-smbus """
+        return self.write_reg(address, reg, value)
+
+    def write_i2c_block_data(self, address, reg, block):
+        """ Compatibility alias for python3-smbus """
+        return self.write_reg(address, reg, block)
