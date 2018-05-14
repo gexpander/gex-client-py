@@ -183,8 +183,8 @@ with gex.Client(gex.TrxRawUSB()) as client:
 
     while True:
         b1 += random.randint(-20, 15)
-        b2 += random.randint(-20, 15)
-        b3 += random.randint(-20, 15)
+        b2 += random.randint(-20, 18)
+        b3 += random.randint(-15, 13)
 
         if b1 < 0: b1 = 0
         if b2 < 0: b2 = 0
@@ -197,4 +197,4 @@ with gex.Client(gex.TrxRawUSB()) as client:
         n2.set_brightness(b2)
         n3.set_brightness(b3)
 
-        time.sleep(0.001)
+        time.sleep(0.05)
