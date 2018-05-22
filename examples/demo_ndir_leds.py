@@ -2,6 +2,8 @@ import time
 
 import gex
 
+# NDIR CO2 sensor showing the concentration on a SIPO-based LED display
+
 with gex.Client(gex.TrxRawUSB()) as client:
     ser = gex.USART(client, 'ser')
     leds = gex.SIPO(client, 'leds')

@@ -2,6 +2,8 @@ import time
 
 import gex
 
+# basic NDIR CO2 sensor readout
+
 with gex.Client(gex.TrxRawUSB()) as client:
     ser = gex.USART(client, 'ser')
 

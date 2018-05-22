@@ -2,6 +2,8 @@
 import gex
 import time
 
+# play a little neopixel animation as a demo
+
 with gex.Client(gex.TrxRawUSB()) as client:
     # Neopixel strip
     strip = gex.Neopixel(client, 'npx')

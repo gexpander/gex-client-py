@@ -3,6 +3,8 @@ import time
 
 import gex
 
+# test with the radio gw
+
 with gex.DongleAdapter(gex.TrxRawUSB(remote=True), 0x10) as transport:
 # with gex.TrxRawUSB() as transport:
 

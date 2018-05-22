@@ -1,6 +1,14 @@
 import time
 import gex
 
+# GEX pomodoro timer
+
+# button btn
+# neopixel neo
+
+# this is an example of using GEX as a user interface.
+# for practical use it would be better to make this into a standalone device with a custom firmware.
+
 WK_TIME = 25
 BK_TIME = 5
 LIGHT_CNT = 30

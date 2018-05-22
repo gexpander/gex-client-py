@@ -2,6 +2,8 @@
 import gex
 import time
 
+# simple demo with the dot matrix phat
+
 ADDR = 0x61
 MODE = 0b00011000
 OPTS = 0b00001110 # 1110 = 35mA, 0000 = 40mA

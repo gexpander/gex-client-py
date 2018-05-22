@@ -2,6 +2,8 @@
 import gex
 import time
 
+# generating a pulse on gpio, test of the unit
+
 with gex.Client(gex.TrxRawUSB()) as client:
     out = gex.DOut(client, 'out')
 

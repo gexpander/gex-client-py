@@ -8,6 +8,8 @@ import datetime
 
 from scipy.io import wavfile
 
+# this script captures lightnings and stores them to npy files
+
 # ADC channel 1 -> 100n -> o -> long wire (antenna)
 #                          |
 #                          '-> 10k -> GND

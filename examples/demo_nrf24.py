@@ -5,7 +5,6 @@ import sx_fsk as sx
 
 
 # this is a demo with two NRF24L01+ modules connected to SPI and some GPIO.
-# using the ESB function.
 
 class Nrf:
     def __init__(self, ce: gex.DOut, irq: gex.DIn, spi: gex.SPI, num):

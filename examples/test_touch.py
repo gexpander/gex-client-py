@@ -2,6 +2,8 @@ import time
 
 import gex
 
+# toush sensing test
+
 with gex.Client(gex.TrxRawUSB()) as client:
     tsc = gex.TOUCH(client, 'tsc')
 

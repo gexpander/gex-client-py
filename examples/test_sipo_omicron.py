@@ -2,6 +2,8 @@ import time
 
 import gex
 
+# sipo example
+
 with gex.Client(gex.TrxRawUSB()) as client:
     sipo = gex.SIPO(client, 'sipo')
     d4 = gex.DOut(client, 'd4')

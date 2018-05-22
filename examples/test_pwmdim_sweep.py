@@ -2,6 +2,8 @@ import time
 
 import gex
 
+# pwm frequency sweep
+
 with gex.Client(gex.TrxRawUSB()) as client:
     pwm = gex.PWMDim(client, 'dim')
 
