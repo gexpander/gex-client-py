@@ -72,7 +72,7 @@ class DongleAdapter(BaseGexTransport):
             pld_len = pp.u8()
             pld = pp.blob(pld_len)
 
-            # print("Rx chunk(%d): %s" % (pld_len, pld))
+            #print("Rx chunk(%d): %s" % (pld_len, pld))
 
             if slave_addr == self._slaveAddr:
                 if self._listener is not None:
@@ -84,8 +84,6 @@ class DongleAdapter(BaseGexTransport):
     def write(self, buffer):
         # multipart sending
         pb = gex.PayloadBuilder()
-        # pb.u8(0x47)
-        # pb.u8(0xB8)
         pb.u8(ord('m'))
         pb.u8(self._slaveAddr)
         pb.u16(len(buffer))
@@ -101,6 +99,9 @@ class DongleAdapter(BaseGexTransport):
         spaceused = len(pb.buf)
         fits = min(64-spaceused, len(buffer))
         pb.blob(buffer[start:fits])
+
+        # TODO rewrite this to send_raw
+
         if (spaceused + fits) < 64:
             pb.zeros(64 - (spaceused + fits))
         start += fits
@@ -126,28 +127,25 @@ class DongleAdapter(BaseGexTransport):
     def poll(self, timeout, testfunc=None):
         self._transport.poll(timeout, testfunc)
 
-    def gw_reset(self):
-        pb = gex.PayloadBuilder()
-        # pb.u8(0x47)
-        # pb.u8(0xB8)
-        pb.u8(ord('r'))
+    def gw_write_raw(self, pb:gex.PayloadBuilder):
         spaceused = len(pb.buf)
         pb.zeros(64 - spaceused)
         self._transport.write(pb.close())
 
+    def gw_reset(self):
+        pb = gex.PayloadBuilder()
+        pb.u8(ord('r'))
+        self.gw_write_raw(pb)
+
     def gw_add_nodes(self, nodes):
         pb = gex.PayloadBuilder()
-        # pb.u8(0x47)
-        # pb.u8(0xB8)
         pb.u8(ord('n'))
         pb.u8(len(nodes))
 
         for n in nodes:
             pb.u8(n)
 
-        spaceused = len(pb.buf)
-        pb.zeros(64 - spaceused)
-        self._transport.write(pb.close())
+        self.gw_write_raw(pb)
 
     def gw_get_net_id(self):
         if self._address is not None:
@@ -155,12 +153,8 @@ class DongleAdapter(BaseGexTransport):
             return self._address
 
         pb = gex.PayloadBuilder()
-        # pb.u8(0x47)
-        # pb.u8(0xB8)
         pb.u8(ord('i'))
-        spaceused = len(pb.buf)
-        pb.zeros(64 - spaceused)
-        self._transport.write(pb.close())
+        self.gw_write_raw(pb)
 
         self.poll(0.5, lambda: self._address is not None)
         return self._address

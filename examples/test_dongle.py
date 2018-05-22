@@ -11,13 +11,18 @@ with gex.DongleAdapter(gex.TrxRawUSB(remote=True), 0x10) as transport:
     # connect GEX client library to the remote slave
     client = gex.Client(transport)
 
-    do = gex.DOut(client, "led")
-    adc = gex.ADC(client, "adc")
-
     while True:
-        do.toggle(confirm=True)
-        print(adc.read_smooth())
-        time.sleep(0.2)
+        client.query_raw(type=gex.MSG_PING)
+        print("ok")
+        time.sleep(0.1)
+
+    # do = gex.DOut(client, "led")
+    # adc = gex.ADC(client, "adc")
+    #
+    # while True:
+    #     do.toggle(confirm=True)
+    #     print(adc.read_smooth())
+    #     time.sleep(0.2)
 
     # adc = gex.ADC(client, "adc")
     # for j in range(10):
