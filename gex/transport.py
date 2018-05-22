@@ -84,8 +84,8 @@ class DongleAdapter(BaseGexTransport):
     def write(self, buffer):
         # multipart sending
         pb = gex.PayloadBuilder()
-        pb.u8(0x47)
-        pb.u8(0xB8)
+        # pb.u8(0x47)
+        # pb.u8(0xB8)
         pb.u8(ord('m'))
         pb.u8(self._slaveAddr)
         pb.u16(len(buffer))
@@ -128,8 +128,8 @@ class DongleAdapter(BaseGexTransport):
 
     def gw_reset(self):
         pb = gex.PayloadBuilder()
-        pb.u8(0x47)
-        pb.u8(0xB8)
+        # pb.u8(0x47)
+        # pb.u8(0xB8)
         pb.u8(ord('r'))
         spaceused = len(pb.buf)
         pb.zeros(64 - spaceused)
@@ -137,8 +137,8 @@ class DongleAdapter(BaseGexTransport):
 
     def gw_add_nodes(self, nodes):
         pb = gex.PayloadBuilder()
-        pb.u8(0x47)
-        pb.u8(0xB8)
+        # pb.u8(0x47)
+        # pb.u8(0xB8)
         pb.u8(ord('n'))
         pb.u8(len(nodes))
 
@@ -155,8 +155,8 @@ class DongleAdapter(BaseGexTransport):
             return self._address
 
         pb = gex.PayloadBuilder()
-        pb.u8(0x47)
-        pb.u8(0xB8)
+        # pb.u8(0x47)
+        # pb.u8(0xB8)
         pb.u8(ord('i'))
         spaceused = len(pb.buf)
         pb.zeros(64 - spaceused)
