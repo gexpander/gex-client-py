@@ -13,6 +13,10 @@ class PayloadBuilder:
         """ Get the byte buffer """
         return self.buf
 
+    def reset(self):
+        """ Clear the buffer """
+        self.buf.clear()
+
     def u8(self, num:int):
         """ Add a uint8_t """
         self.buf.extend((num&0xFF).to_bytes(length=1, byteorder=self.endian, signed=False))
