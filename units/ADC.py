@@ -361,7 +361,7 @@ class ADC(gex.Unit):
     def capture_in_progress(self):
         return self._stream_running or self._trig_buf is not None
 
-    def capture(self, count, timeout=None):
+    def capture(self, count, timeout=None, async=False, lst=None):
         """
         Start a block capture.
         This is similar to a forced trigger, but has custom size and doesn't include any pre-trigger.
@@ -384,7 +384,7 @@ class ADC(gex.Unit):
         self._bcap_done = False
         self._stream_running = True # we use this flag to block any concurrent access
 
-        def lst(frame):
+        def _lst(frame):
             pp = gex.PayloadParser(frame.data)
 
             if frame.type == EVT_CAPT_MORE or len(frame.data) != 0:
@@ -400,22 +400,26 @@ class ADC(gex.Unit):
 
             if frame.type == EVT_CAPT_DONE:
                 self._bcap_done = True
+                if async:
+                    lst(self._parse_buffer(buffer))
+                    self._stream_running = False
                 return TF.CLOSE
 
             return TF.STAY
 
-        self._query_async(cmd=CMD_BLOCK_CAPTURE, pld=pb.close(), callback=lst)
+        self._query_async(cmd=CMD_BLOCK_CAPTURE, pld=pb.close(), callback=_lst)
 
-        # wait with a timeout
-        self.client.transport.poll(timeout, lambda: self._bcap_done == True)
+        if not async:
+            # wait with a timeout
+            self.client.transport.poll(timeout, lambda: self._bcap_done == True)
 
-        self._stream_running = False
+            self._stream_running = False
 
-        if not self._bcap_done:
-            self.abort()
-            raise Exception("Capture not completed within timeout")
+            if not self._bcap_done:
+                self.abort()
+                raise Exception("Capture not completed within timeout")
 
-        return self._parse_buffer(buffer)
+            return self._parse_buffer(buffer)
 
     def on_stream(self, lst):
         self._stream_listener = lst
